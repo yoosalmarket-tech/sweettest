@@ -349,6 +349,11 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .mascot-wander svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px #79573522)}
 .mascot-wander .mascot-spark{opacity:.8}
 @media(prefers-reduced-motion:reduce){.mascot-wander{display:none}}
+
+/* Keep serving artwork inside the carousel's safe area, without cutting off SVG shadows. */
+.dessertstage{overflow:visible;z-index:1}
+.dessertstage .spring-carousel{overflow:visible;transform-origin:50% 55%}
+.sweet-controls{position:relative;z-index:2}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><header class="mascot-header" id="mascot-header" data-mood="happy"><button class="mascot-button" id="mascot-button" type="button" aria-label="احكي مع لوزة"><svg viewBox="0 0 94 88" aria-hidden="true"><g stroke="#70482f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 58Q12 58 10 46M67 57Q81 55 83 42M10 46l-4-5m4 5 4-7m69 3 4-5m-4 5-4-6M30 69l-5 10h-8m43-10 5 10h8" fill="none"/><path d="M45 9Q49 7 53 11L80 36Q84 40 80 46L53 73Q49 77 44 74L14 47Q10 43 14 38Z" fill="#c48a46"/><path d="M45 4Q49 2 53 6L80 32Q84 36 80 42L52 67Q48 71 43 67L14 40Q10 36 14 32Z" fill="#efc67c"/><path d="M19 42L44 65 49 68 76 44M20 48l24 22m29-23L51 70" fill="none" stroke="#aa733e" stroke-width="1.2"/><path d="M23 30L44 11m15 3 13 14M27 48l10 10" fill="none" stroke="#fff0c6" stroke-width="2"/><path d="M40 13q8-8 16-1-1 7-8 9-6-1-8-8Z" fill="#849348"/></g><g fill="#70482f" class="mascot-eyes"><ellipse cx="34" cy="34" rx="3.5" ry="5"/><ellipse cx="60" cy="34" rx="3.5" ry="5"/></g><g fill="#d78f72" opacity=".75"><ellipse cx="27" cy="43" rx="5" ry="2.5"/><ellipse cx="67" cy="43" rx="5" ry="2.5"/></g><path class="mascot-mouth" d="M40 44Q47 51 54 44" fill="none" stroke="#70482f" stroke-width="2.6" stroke-linecap="round"/><path class="mascot-spark" d="M83 11v10m-5-5h10M8 15v7m-3.5-3.5h7" fill="none" stroke="#b68b43" stroke-width="2" stroke-linecap="round"/></svg></button><div class="mascot-bubble"><span class="mascot-name">لوزة</span><span id="mascot-speech" role="status" aria-live="polite">يا هلا بالحلوين!</span></div></header><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
@@ -785,7 +790,7 @@ function paintSpring(){
  if(!w||!h)return;
  const packageInfo=s.wheel?s.stage.querySelector(".package-info"):null;
  const infoHeight=packageInfo?.offsetHeight||130;
- const artWidth=Math.max(52,s.wheel?Math.min(w*.52,h*.70,230,Math.max(52,(h*.73-infoHeight-12)*2*320/220)):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
+ const artWidth=Math.max(52,s.wheel?Math.min(w*.52,h*.70,230,Math.max(52,(h*.73-infoHeight-12)*2*320/220)):s.step===2?Math.min(w*.73,h*1.28,330):Math.min(w*(s.circular?.77:.86),h*1.45,365));
  s.stage.style.setProperty("--art-width",artWidth+"px");
  if(s.wheel){
   const previousTop=h*.27+artWidth*220/320/2+clamp(h*.10,16,42);
@@ -826,9 +831,10 @@ function paintSpring(){
    const count=s.items.length,rel=((dif+count/2)%count+count)%count-count/2;
    const angle=rel*2*Math.PI/Math.min(count,5);
    const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
-   const x=sine*w*.38+(s.items.length===2?depth*w*.24:0),y=(front*.23-.065)*h,z=-depth*240;
+   const x=sine*w*.28+(s.items.length===2?depth*w*.22:0),y=(front*.18-.10)*h,z=-depth*240;
    const scale=1-depth*.47;
-   const edgeFade=clamp((2.35-Math.abs(rel))/.55,0,1);
+   // Only the current plate and immediate neighbors are visible; rear plates fade before entering.
+   const edgeFade=clamp((1.50-Math.abs(rel))/.45,0,1);
    const visible=edgeFade>.005;
    el.style.visibility=visible?"visible":"hidden";
    el.style.opacity=((1-depth*.62)*edgeFade).toFixed(3);

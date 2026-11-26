@@ -1068,7 +1068,7 @@ main.addEventListener("pointermove",e=>{
  const deadzone=s.vertical?12:8;
  if(!p.axis){if(Math.hypot(dx,dy)<deadzone)return;if(Math.abs(cross)>Math.abs(primary)){p.rejected=true;return}p.axis=true}
  const drag=s.vertical?Math.sign(primary)*Math.max(0,Math.abs(primary)-deadzone):primary;
- const raw=p.k-drag/(s.vertical?Math.max(175,s.stage.clientHeight*.52):s.wheel?Math.max(100,s.stage.clientWidth*.31):160);
+ const raw=p.k-drag/(s.vertical?Math.max(145,s.stage.clientHeight*.43):s.wheel?Math.max(100,s.stage.clientWidth*.31):160);
  const max=s.items.length-1,elastic=raw<0?raw*.32:raw>max?max+(raw-max)*.32:raw;
  const val=s.circular?raw:clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
  const instantaneous=(val-s.k)/dt;
@@ -1076,12 +1076,12 @@ main.addEventListener("pointermove",e=>{
  s.k=val;p.last=now;paintSpring();
 });
 function branchDestination(position,velocity,delta,start,wasMoving,count){
- const projected=Math.round(position+clamp(velocity*3,-.42,.42));
- const direction=delta<0?1:-1;
- let dest=projected;
+ const travel=clamp(velocity*5.5,-1.65,1.65);
+ let dest=Math.round(position+travel);
  if(!wasMoving&&Math.abs(delta)<28&&Math.abs(velocity)<.09)dest=start;
- else if(Math.abs(delta)>=48&&dest===start)dest=start+direction;
- return clamp(dest,Math.max(0,start-1),Math.min(count-1,start+1));
+ else if(Math.abs(delta)>=48&&dest===start)dest=start+(delta<0?1:-1);
+ // Momentum and drag distance may cross multiple branches; only the street ends limit travel.
+ return clamp(dest,0,count-1);
 }
 function wheelDestination(position,velocity,delta,start,wasMoving){
  // The release position, not an old animation target, determines the snap.
@@ -1101,9 +1101,9 @@ function release(e,canceled=false){
   const momentum=performance.now()-p.last>110?0:s.velocity;
   let dest=Math.round(s.k+momentum*(s.vertical?3:s.wheel?4:7));
   if(s.vertical){
-   // Follow the actual release position; a quick deliberate flick advances one shop.
+   // Long drags and quick flicks may advance across several shops.
    dest=branchDestination(s.k,momentum,delta,p.from,p.wasMoving,s.items.length);
-   s.velocity=clamp(momentum,-.23,.23);
+   s.velocity=clamp(momentum,-.32,.32);
   }else if(s.wheel){dest=wheelDestination(s.k,momentum,delta,p.from,p.wasMoving);s.velocity=clamp(momentum,-.18,.18)}
   else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
   s.target=s.wheel?dest:s.circular?clamp(dest,p.from-2,p.from+2):clamp(dest,0,s.items.length-1);

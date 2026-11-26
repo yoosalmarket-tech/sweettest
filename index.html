@@ -601,12 +601,12 @@ function paintSpring(){
    // around an ellipse, while rear plates recede in perspective.
    const angle=dif*2*Math.PI/s.items.length;
    const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
-   const x=sine*w*.38,y=(front*.23-.065)*h,z=-depth*240;
+   const x=sine*w*.38+(s.items.length===2?depth*w*.24:0),y=(front*.23-.065)*h,z=-depth*240;
    const scale=1-depth*.47;
    el.style.visibility="visible";
    el.style.opacity=(1-depth*.62).toFixed(3);
    el.style.zIndex=String(Math.round(1000-depth*900));
-   const nearby=front<.85&&front>-.99;const tappable=s.step===2&&nearby;
+   const nearby=front<.85;const tappable=s.step===2&&nearby;
    el.classList.toggle("sweet-neighbor",tappable);el.tabIndex=tappable?0:-1;
    if(tappable){el.dataset.act="select-plate:"+i;el.setAttribute("role","button");el.setAttribute("aria-label","عرض "+s.items[i].name)}else{delete el.dataset.act;el.removeAttribute("role");el.removeAttribute("aria-label")}
    el.style.transform="translate(-50%,-50%) translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+clamp(-s.velocity*14,-5,5)+"deg) rotateY("+(sine*11).toFixed(1)+"deg) rotateZ("+(-sine*5).toFixed(1)+"deg) scale("+scale.toFixed(3)+")";

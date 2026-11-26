@@ -138,10 +138,57 @@ h1,h2{font-weight:700;color:#453025}
 .traylabel b{color:#6b4a31}
 .summary{background:#fffaf1ba;border-color:#d9c5a8}
 @media(max-height:480px){.weight output{padding:3px 5px}}
-</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer></div>
+
+.steps{width:112px}
+.checkout-options{display:grid;gap:clamp(5px,1.2dvh,11px);margin-top:clamp(4px,1.4dvh,14px)}
+.checkout-choice{display:flex;align-items:center;text-align:right;gap:10px;width:100%;padding:clamp(7px,1.5dvh,15px) 11px;border:1px solid #d8c4a6;background:#fffaf0b0;border-radius:13px;min-height:0}
+.checkout-choice.chosen{border-color:#a47b45;background:#f3e4c8;box-shadow:inset 0 0 0 1px #b58a5050}
+.choice-icon{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:12px;background:#eee0c9;color:#85603b}
+.chosen .choice-icon{background:#dfc59b;color:#664426}
+.choice-copy{flex:1;display:grid;gap:4px;min-width:0}
+.choice-copy b{font-size:clamp(12px,3.9vw,16px)}
+.choice-copy small{font-size:clamp(9px,2.9vw,12px);color:var(--muted)}
+.choice-radio{width:19px;height:19px;border:1px solid #b69a75;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;font-size:12px}
+.chosen .choice-radio{background:#946c3e;border-color:#946c3e}
+.checkout-panel{background:#fff9edac;border:1px solid #ddc9ad;border-radius:13px;padding:clamp(8px,1.6dvh,15px);display:grid;gap:6px;font-size:13px}
+.checkout-panel>b{font-size:13px}
+.chips{display:flex;gap:5px}
+.chip{flex:1;padding:8px 3px;border:1px solid #dac5a6;background:#fff9ed;border-radius:8px;font-size:clamp(9px,3vw,12px)}
+.chip.chosen{background:#5c3d2e;color:#fff5e2;border-color:#5c3d2e}
+.checkout-spacer{flex:1 1 0;min-height:0}
+.checkout-secondary{margin-top:7px;min-height:36px}
+.demo-account{background:#f1e4cd;border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;gap:5px;align-items:center;font-size:11px}
+.demo-account b{direction:ltr;color:#735339}
+.proof-button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;border:1px dashed #b18b58;border-radius:8px;background:#fff8e9;font-size:12px}
+.proof-button.verified{background:#e8eee2;border-color:#80916c;color:#426246}
+.order-success{width:clamp(38px,8dvh,66px);height:clamp(38px,8dvh,66px);margin:5px auto 3px;background:#e8d6b4;border:1px solid #c9a66d;border-radius:50%;display:grid;place-items:center;color:#795634}
+.order-success svg{width:55%;height:55%}
+.timeline{padding:3px 10px;margin-top:3px;display:grid;gap:clamp(2px,.7dvh,6px)}
+.timeline-item{display:flex;align-items:center;gap:9px;min-height:clamp(30px,5.4dvh,46px);position:relative}
+.timeline-item:not(:last-child):after{content:"";position:absolute;right:13px;top:calc(50% + 13px);height:calc(50% - 8px);width:1px;background:#cbb799}
+.timeline-item i{font-style:normal;border-radius:50%;width:27px;height:27px;display:grid;place-items:center;border:1px solid #cbb799;color:#97826a;font-size:11px;flex:none;background:#f6ecdb}
+.timeline-item.reached i{background:#9b753f;color:white;border-color:#9b753f}
+.timeline-item.current i{box-shadow:0 0 0 3px #dcc59b80}
+.timeline-item div{display:grid;gap:1px;color:#a2907a}
+.timeline-item.reached div{color:var(--ink)}
+.timeline-item b{font-size:clamp(11px,3.6vw,14px)}
+.timeline-item span{font-size:10px;color:var(--muted)}
+#receipt-dialog{width:min(92vw,420px);max-height:90dvh;overflow:auto;color:var(--ink);background:#fbf2e4;border:1px solid #b99a70;border-radius:18px;padding:16px}
+#receipt-dialog::backdrop{background:#36241880}
+.receipt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.receipt-head .round{width:32px;height:32px}
+.receipt-items{margin:9px 0}
+#receipt-dialog .notice{margin-top:9px}
+@media(max-height:570px){.checkout-options{gap:4px;margin-top:2px}.checkout-choice{padding:5px 8px;gap:7px}.choice-icon{width:30px;height:30px}.choice-icon svg{width:20px;height:20px}.choice-copy{gap:1px}.checkout-panel{padding:6px;gap:3px}.chip{padding:5px 2px}.proof-button{min-height:28px}.proof-button svg{width:19px;height:19px}.demo-account{padding:3px 5px}.checkout-secondary{min-height:28px;margin-top:4px}.timeline-item{min-height:27px}.timeline-item i{width:23px;height:23px}.timeline-item:not(:last-child):after{right:11px}.timeline-item span{font-size:9px}.order-success{margin:1px auto}}
+@media(max-height:420px) and (min-width:600px){main[data-step="4"],main[data-step="5"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;column-gap:10px}main[data-step="4"]>.center,main[data-step="5"]>.center{grid-column:1/-1}main[data-step="4"]>.checkout-options,main[data-step="5"]>.checkout-options{grid-column:1;grid-row:2;align-self:start}main[data-step="4"]>.checkout-panel,main[data-step="5"]>.checkout-panel{grid-column:2;grid-row:2;align-self:start}main[data-step="4"]>.summary,main[data-step="5"]>.summary{grid-column:1/-1;grid-row:3}main[data-step="4"]>.checkout-spacer,main[data-step="5"]>.checkout-spacer{display:none}main[data-step="6"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto auto;gap:4px}main[data-step="6"]>.center:first-child{grid-column:1;grid-row:1;align-self:center}main[data-step="6"]>.timeline{grid-column:2;grid-row:1}main[data-step="6"]>.summary{grid-column:1/-1;grid-row:2}main[data-step="6"]>.hint{grid-column:1/-1;grid-row:3}main[data-step="6"]>.checkout-spacer{display:none}}
+</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
-const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"نابلسية",desc:"جبنة وعجينة نابلسية مع الفستق",price:100,kind:"kunafa"},{name:"نمورة",desc:"سميد ذهبي وقطر",price:70,kind:"basbousa"},{name:"عربية",desc:"كنافة عربية بالجوز",price:90,kind:"arabic"},{name:"بقلاوة",desc:"طبقات مقرمشة بالفستق",price:120,kind:"baklava"}]};
+const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
+let fulfillment="pickup",slot="20 دقيقة",zone="المنطقة الأولى",payment="wallet",proof=false,order=null,orderState=0;
+const deliveryFee=()=>fulfillment==="delivery"?10:0, grandTotal=()=>total()+deliveryFee();
+const demoNames=[["لمسة ذهب","كنافة ذهبية بالجبنة والفستق"],["غيمة عسل","سميد محمّص بلمسة قطر"],["ليالي العنبر","كنافة عربية بالجوز والقرفة"],["تاج الفستق","رقائق مقرمشة وحشوة فستق"]];
+function fictionalize(d){return {...d,sweets:d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc}))}}
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
@@ -213,11 +260,34 @@ function dessert(kind,removedKg=0){
 function dots(n,i){return '<div class="dots">'+Array.from({length:n},(_,k)=>'<span class="'+(i===k?"on":"")+'"></span>').join("")+'</div>'}
 function nav(i,n){return '<div class="nav"><button class="round" data-act="prev" aria-label="السابق">‹</button>'+dots(n,i)+'<button class="round" data-act="next" aria-label="التالي">›</button></div>'}
 function primary(label,act,disabled=false){return '<button class="primary" data-act="'+act+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
-function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);document.getElementById("steps").innerHTML=[0,1,2,3].map(i=>'<i class="'+(i<=step?"on":"")+'"></i>').join("");back.style.visibility=step?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
+
+function checkoutIcon(kind){let shapes={bag:'<path d="M5 8h14l1 13H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',truck:'<path d="M2 5h13v12H2zM15 9h4l3 4v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',wallet:'<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M21 10h-6a3 3 0 0 0 0 6h6"/><circle cx="15" cy="13" r=".7"/>',cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 12h1m12 0h1"/>',file:'<path d="M6 3h8l4 4v14H6zM14 3v5h4M9 13h6m-6 4h6"/>',check:'<path d="m5 12 4 4 10-10"/>'};return '<svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+shapes[kind]+'</svg>'}
+function choice(act,on,title,desc,icon){return '<button class="checkout-choice '+(on?"chosen":"")+'" data-act="'+act+'" aria-pressed="'+on+'"><span class="choice-icon">'+checkoutIcon(icon)+'</span><span class="choice-copy"><b>'+title+'</b><small>'+desc+'</small></span><span class="choice-radio">'+(on?"✓":"")+'</span></button>'}
+function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" aria-pressed="'+on+'" data-act="'+esc(act)+'">'+esc(label)+'</button>'}
+function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
+function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);document.getElementById("steps").innerHTML=[0,1,2,3,4,5,6].map(i=>'<i class="'+(i<=step?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
 if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">٠١ — اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب للأعلى أو للأسفل لاختيار الفرع</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
 if(step===1){main.innerHTML='<div class="center"><div class="eyebrow">٠٢ — اختر البوكس</div><h1>ضيافتك على ذوقك</h1><p class="hint">'+esc(b.name)+' · اسحب يميناً أو يساراً</p></div><div class="stage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+boxArt(data.boxes[wrap(box-1,data.boxes.length)].kind)+'</div><div class="hero">'+boxArt(bx.kind)+'</div><div class="neighbor next">'+boxArt(data.boxes[wrap(box+1,data.boxes.length)].kind)+'</div></div></div>'+nav(box,data.boxes.length)+'<div class="center"><h2>'+esc(bx.name)+'</h2><p class="hint">يكفي تقريباً '+fmt(bx.capacity)+' كيلو حلويات</p></div>';footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
 if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">٠٣ — شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+nav(sweet,data.sweets.length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(capacity())+' كيلو</div><div class="progress"><i style="width:'+Math.min(100,kg()/capacity()*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
-if(step===3){main.innerHTML='<div class="center"><div class="eyebrow">٠٤ — مراجعة الطلب</div><h1>بوكس على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><div class="notice">هذا نموذج تجريبي. الفروع والأسعار افتراضية ولا يتم إرسال طلب حقيقي أو تحصيل أي دفعة.</div>';footer.innerHTML=primary(saved?'تم حفظ التشكيلة ✓':'احفظ تشكيلتك','save')+'<button class="secondary" style="margin-top:9px" data-act="restart">ابدأ من جديد</button>'}
+
+if(step===3){
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٤ — مراجعة السلة</div><h1>تشكيلة على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><p class="hint center">الأسعار والتشكيلة لأغراض العرض فقط</p>';
+ footer.innerHTML=primary("متابعة الطلب","checkout")+'<button class="secondary checkout-secondary" data-act="back">تعديل التشكيلة</button>';
+}
+if(step===4){
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٥ — استلام الطلب</div><h1>كيف بتحب تستلم طلبك؟</h1><p class="hint">اختر طريقة الاستلام المناسبة إلك</p></div><div class="checkout-options">'+choice("pickup",fulfillment==="pickup","استلام من الفرع","جهّز البوكس واستلمه بنفسك","bag")+choice("delivery",fulfillment==="delivery","توصيل لباب البيت","رسوم توصيل تجريبية 10 ₪","truck")+'</div><div class="checkout-panel">'+(fulfillment==="pickup"?'<b>وقت الوصول المتوقع</b><div class="chips">'+["20 دقيقة","40 دقيقة","ساعة"].map(x=>chip("slot:"+x,slot===x,x)).join("")+'</div>':'<b>منطقة التوصيل (تجريبية)</b><div class="chips">'+["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].map(x=>chip("zone:"+x,zone===x,x)).join("")+'</div><p class="hint">عنوان افتراضي للعرض — لا حاجة لإدخال بيانات شخصية.</p>')+'</div><div class="checkout-spacer"></div><div class="summary"><div class="summaryrow"><span>قيمة الحلويات</span><b>'+money(total())+'</b></div><div class="summaryrow"><span>التوصيل</span><b>'+money(deliveryFee())+'</b></div><div class="summaryrow"><b>الإجمالي</b><span class="bigprice">'+money(grandTotal())+'</span></div></div>';
+ footer.innerHTML=primary("متابعة إلى الدفع","payment");
+}
+if(step===5){
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٦ — الدفع</div><h1>كيف بدك تدفع؟</h1><p class="hint">تجربة دفع بدون أي تحويل مالي حقيقي</p></div><div class="checkout-options">'+choice("wallet",payment==="wallet","محفظة إلكترونية","محاكاة تحويل وإثبات الدفع","wallet")+choice("cash",payment==="cash",fulfillment==="pickup"?"الدفع عند الاستلام":"الدفع عند التوصيل","محاكاة الدفع النقدي","cash")+'</div>'+(payment==="wallet"?'<div class="checkout-panel proof-panel"><div class="summaryrow"><span>المبلغ المطلوب</span><b>'+money(grandTotal())+'</b></div><div class="demo-account"><span>حساب تجريبي فقط</span><b>DEMO · 000000</b></div><button class="proof-button '+(proof?"verified":"")+'" data-act="proof">'+checkoutIcon(proof?"check":"file")+'<span>'+(proof?"تم إرفاق إثبات تجريبي":"إرفاق إثبات دفع تجريبي")+'</span></button><p class="hint">لن يتم رفع أي ملف أو إرسال أي أموال.</p></div>':'<div class="checkout-panel"><b>الدفع نقداً</b><p class="hint">هذا الخيار لا يرسل طلباً فعلياً. ستشاهد فقط تجربة التأكيد والتجهيز.</p></div>')+'<div class="checkout-spacer"></div><div class="summary"><div class="summaryrow"><b>المبلغ الإجمالي</b><span class="bigprice">'+money(grandTotal())+'</span></div></div>';
+ footer.innerHTML=primary("تأكيد الطلب التجريبي","submit",payment==="wallet"&&!proof);
+}
+if(step===6&&order){
+ const states=order.payment==="wallet"?["قيد مراجعة الدفع","تم تأكيد الدفع","جاري تجهيز البوكس",order.fulfillment==="pickup"?"جاهز للاستلام":"في الطريق إليك","تم التسليم"]:["تم تسجيل الطلب","تم تأكيد الطلب","جاري تجهيز البوكس",order.fulfillment==="pickup"?"جاهز للاستلام":"في الطريق إليك","تم التسليم"];
+ const labels=["استلمنا طلبك","التأكيد","تجهيز الحلويات",order.fulfillment==="pickup"?"الاستلام":"التوصيل","اكتملت التجربة"];
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٧ — متابعة الطلب</div><div class="order-success">'+checkoutIcon(orderState===4?"check":"bag")+'</div><h1>'+states[orderState]+'</h1><p class="hint">طلب تجريبي #'+esc(order.id)+'</p></div><div class="timeline">'+labels.map((x,i)=>'<div class="timeline-item '+(i<=orderState?"reached":"")+' '+(i===orderState?"current":"")+'"><i>'+(i<orderState?"✓":i+1)+'</i><div><b>'+x+'</b><span>'+(i<orderState?"تم":i===orderState?"المرحلة الحالية":"قيد الانتظار")+'</span></div></div>').join("")+'</div><div class="checkout-spacer"></div><div class="summary"><div class="summaryrow"><span>'+esc(order.branch)+'</span><b>'+money(order.total)+'</b></div><div class="summaryrow"><span>'+ (order.fulfillment==="pickup"?"استلام من الفرع · "+esc(order.slot):"توصيل · "+esc(order.zone))+'</span><b>'+fmt(order.weight)+' كغ</b></div></div><p class="hint center">محاكاة فقط — لا يتم إرسال طلب حقيقي.</p>';
+ footer.innerHTML=orderState<4?primary("محاكاة المرحلة التالية","advance")+'<button class="secondary checkout-secondary" data-act="receipt">عرض تفاصيل الطلب</button>':primary("ابدأ تجربة جديدة","restart")+'<button class="secondary checkout-secondary" data-act="receipt">عرض تفاصيل الطلب</button>';
+}
 footer.insertAdjacentHTML("beforeend",'<div class="footnote"><a href="https://yoosal.net" target="_blank" rel="noopener">تطوير وكالة يوصل · YOOSAL</a></div>');mountSpring()}
 function persist(){try{localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}))}catch{}}
 function baseAction(a){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
@@ -228,9 +298,22 @@ else if(a==="plus"&&step===2&&kg()+.5<=capacity())amounts[sweet]=(amounts[sweet]
 else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-.5);
 else if(a==="remove"&&step===2)delete amounts[sweet];
 else if(a==="review"&&step===2&&kg()>0)step=3;
-else if(a==="save"&&step===3){persist();saved=true}
-else if(a==="restart"){step=0;branch=box=sweet=0;amounts={}}
-else if(a==="back"&&step>0)step--;
+
+else if(a==="checkout"&&step===3&&kg()>0)step=4;
+else if(step===4&&(a==="pickup"||a==="delivery")){fulfillment=a;proof=false}
+else if(step===4&&a.startsWith("slot:"))slot=a.slice(5);
+else if(step===4&&a.startsWith("zone:"))zone=a.slice(5);
+else if(a==="payment"&&step===4)step=5;
+else if(step===5&&(a==="wallet"||a==="cash")){payment=a;proof=false}
+else if(a==="proof"&&step===5&&payment==="wallet")proof=!proof;
+else if(a==="submit"&&step===5&&kg()>0&&(payment==="cash"||proof)){
+ order={id:"ST-"+String(Math.floor(1000+Math.random()*9000)),branch:data.branches[branch].name,box:data.boxes[box].name,fulfillment,slot,zone,payment,fee:deliveryFee(),total:grandTotal(),weight:kg(),items:Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>({name:data.sweets[i].name,weight:v,price:v*data.sweets[i].price}))};orderState=0;step=6;
+}
+else if(a==="advance"&&step===6&&order)orderState=Math.min(4,orderState+1);
+else if(a==="receipt"&&step===6){showReceipt();return}
+else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
+else if(a==="restart"){step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0}
+else if(a==="back"&&step>0&&step<6)step--;
 persist();draw()}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
@@ -381,5 +464,5 @@ window.addEventListener("resize",()=>paintSpring(),{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>paintSpring(),{passive:true});
 function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%0.5===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
 restore();draw();
-const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=d;branch=box=sweet=0;amounts={};restore();draw()}}).catch(()=>{});
+const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=fictionalize(d);branch=box=sweet=0;amounts={};restore();draw()}}).catch(()=>{});
 </script></body></html>

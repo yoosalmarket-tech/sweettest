@@ -345,7 +345,7 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 /* Lawza leaves her header spot occasionally, without intercepting any interaction. */
 .mascot-header.wandering .mascot-button{visibility:hidden}
 .mascot-header.wandering .mascot-bubble{opacity:.72;transition:opacity .2s}
-.mascot-wander{position:absolute;z-index:9;pointer-events:none;will-change:transform;transform-origin:50% 80%}
+.mascot-wander{position:absolute;z-index:100;pointer-events:none;will-change:transform;transform-origin:50% 80%}
 .mascot-wander svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px #79573522)}
 .mascot-wander .mascot-spark{opacity:.8}
 @media(prefers-reduced-motion:reduce){.mascot-wander{display:none}}
@@ -533,7 +533,7 @@ function mascotLine(action="step",delta=0,index=null){
  if(step===6)return [["استلمنا طلبك التجريبي!","تأكدنا من طلبك!","بنجهّز أحلى تشكيلة!","الحلا صار جاهز!","صحتين وهنا!"][orderState]||"صحتين!",orderState===4?"excited":"happy"];
  return defaults[step]||defaults[0];
 }
-let mascotIdleTimer=0,mascotWander=null,mascotIdleEnabled=false,mascotLastPlay=-1;
+let mascotIdleTimer=0,mascotWander=null,mascotIdleEnabled=false,mascotLastOrder="";
 function mascotIdleAllowed(){return mascotIdleEnabled&&!document.hidden&&!reduceMotion.matches&&[0,1,2,7,8,9].includes(step)&&!pointer&&!document.querySelector("dialog[open]")}
 function stopMascotWander(){
  clearTimeout(mascotIdleTimer);mascotIdleTimer=0;
@@ -545,33 +545,41 @@ function scheduleMascotPlay(delay=3000){
  if(!mascotIdleAllowed())return;
  mascotIdleTimer=setTimeout(()=>{mascotIdleTimer=0;if(!mascotIdleAllowed()){scheduleMascotPlay(3000);return}
  const header=document.getElementById("mascot-header");if(header.classList.contains("talking")||Math.abs((scene?.target||0)-(scene?.k||0))>.02){scheduleMascotPlay(3000);return}
- if(Math.random()<.66)playMascot();else scheduleMascotPlay(6500+Math.random()*3000);
+ playMascot();
  },delay);
 }
-function mascotPlayFrames(w,h,homeX,homeY,size,variant){
- const xLeft=clamp(8-homeX,-homeX,w-size-homeX),xRight=Math.max(xLeft,w-size-8-homeX),midX=clamp(w*.46-homeX,xLeft,xRight),yLow=Math.max(0,h*.62-homeY-size),yMid=Math.max(0,h*.35-homeY);
- const frame=(x,y,r=0,s=1,offset=0)=>({transform:"translate3d("+x+"px,"+y+"px,0) rotate("+r+"deg) scale("+s+")",offset});
- if(variant===0)return [frame(0,0,0,1,0),frame(xLeft,0,-12,1,.18),frame(xLeft,yMid,9,1.05,.4),frame(xLeft,yLow,-9,.94,.64),frame(xLeft,yMid,12,1,.78),frame(0,0,0,1,1)];
- if(variant===1)return [frame(0,0,0,1,0),frame(xRight,0,13,1,.17),frame(xRight,yMid,-10,1,.39),frame(xRight,yLow,12,1.07,.62),frame(xRight,0,-8,1,.84),frame(0,0,0,1,1)];
- return [frame(0,0,0,1,0),frame(midX,Math.min(yMid,36),-15,1,.21),frame(midX,Math.min(yMid,36)-10,12,1.13,.35),frame(midX,Math.min(yMid,36),-8,.96,.52),frame(xLeft,0,-12,1,.72),frame(0,0,0,1,1)];
+function mascotPeekOrder(){
+ const orders=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]].filter(x=>x.join(",")!==mascotLastOrder);
+ const order=orders[Math.floor(Math.random()*orders.length)];mascotLastOrder=order.join(",");return order;
 }
-function mascotPeekFrames(w,h,homeX,homeY,size,height,variant){
- const frame=(x,y,r,opacity,offset,easing="linear")=>({transform:"translate3d("+(x-homeX)+"px,"+(y-homeY)+"px,0) rotate("+r+"deg)",opacity,offset,easing});
- // Leave at the nearest side, then cross offscreen invisibly to a different edge.
- const exitX=w+size+12, sideY=clamp(h*(variant===4?.57:.38),height,h-height*2);
- const bottom=variant===3,left=variant===4;
- const hiddenX=bottom?w*.48-size/2:left?-size-16:w+16;
- const hiddenY=bottom?h+16:sideY;
- const peekX=bottom?hiddenX:left?-size*.28:w-size*.72;
- const peekY=bottom?h-height*.68:sideY;
- const tilt=bottom?0:left?14:-14;
- return [frame(homeX,homeY,0,1,0,"cubic-bezier(.45,0,.85,.5)"),
- frame(exitX,homeY,-12,1,.14),frame(exitX,homeY,-12,0,.15),
- frame(hiddenX,hiddenY,tilt,0,.16),frame(hiddenX,hiddenY,tilt,1,.17,"cubic-bezier(.1,.8,.25,1)"),
- frame(peekX,peekY,tilt,1,.32),frame(peekX+(bottom?0:left?4:-4),peekY-(bottom?5:0),tilt*.5,1,.46),
- frame(peekX,peekY,tilt,1,.59,"cubic-bezier(.5,0,.9,.6)"),frame(hiddenX,hiddenY,tilt,1,.73),
- frame(hiddenX,hiddenY,tilt,0,.74),frame(exitX,homeY,10,0,.75),frame(exitX,homeY,10,1,.76,"cubic-bezier(.1,.8,.2,1)"),
- frame(homeX-4,homeY,-5,1,.93),frame(homeX,homeY,0,1,1)];
+function mascotPeekFrames(w,h,homeX,homeY,size,height,order){
+ // Each side has its own entrance, visible hold, and retreat. No visible teleportation.
+ const total=3400,frames=[];
+ const add=(x,y,r,opacity,ms,easing="linear")=>frames.push({transform:"translate3d("+(x-homeX)+"px,"+(y-homeY)+"px,0) rotate("+r+"deg)",opacity,offset:ms/total,easing});
+ const exitX=w+size+20;
+ add(homeX,homeY,0,1,0,"cubic-bezier(.45,0,.8,.5)");
+ add(exitX,homeY,-10,1,190);add(exitX,homeY,-10,0,205);
+ order.forEach((side,i)=>{
+  const t=230+i*900,bottom=side===0,left=side===1;
+  const sideY=clamp(h*(left?.57:.38),height,h-height*2);
+  const hiddenX=bottom?w*.5-size/2:left?-size-24:w+24;
+  const hiddenY=bottom?h+24:sideY;
+  // Show the entire face, with only a small part of the body outside the edge.
+  const peekX=bottom?hiddenX:left?-size*.07:w-size*.93;
+  const peekY=bottom?h-height*.88:sideY;
+  const tilt=bottom?0:left?9:-9;
+  add(hiddenX,hiddenY,tilt,0,t);
+  add(hiddenX,hiddenY,tilt,1,t+10,"cubic-bezier(.12,.8,.22,1)");
+  add(peekX,peekY,tilt,1,t+180);
+  add(peekX+(bottom?0:left?3:-3),peekY-(bottom?3:0),tilt*.4,1,t+280);
+  add(peekX,peekY,tilt,1,t+590,"cubic-bezier(.4,0,.9,.6)");
+  add(hiddenX,hiddenY,tilt,1,t+780);
+  add(hiddenX,hiddenY,tilt,0,t+800);
+ });
+ add(exitX,homeY,8,0,3020);
+ add(exitX,homeY,8,1,3035,"cubic-bezier(.12,.8,.25,1)");
+ add(homeX-5,homeY,-4,1,3310);add(homeX,homeY,0,1,total);
+ return frames;
 }
 function playMascot(){
  if(!mascotIdleAllowed()||mascotWander)return;
@@ -582,9 +590,9 @@ function playMascot(){
  const sprite=document.createElement("div");sprite.className="mascot-wander";sprite.setAttribute("aria-hidden","true");sprite.innerHTML=button.innerHTML;
  Object.assign(sprite.style,{left:(b.left-a.left)+"px",top:(b.top-a.top)+"px",width:size+"px",height:b.height+"px"});
  app.appendChild(sprite);header.classList.add("wandering");
- const choices=[0,1,2,3,4,5].filter(i=>i!==mascotLastPlay);const peeks=choices.filter(i=>i>=3),walks=choices.filter(i=>i<3);const pool=Math.random()<.65?peeks:walks;const variant=pool[Math.floor(Math.random()*pool.length)];mascotLastPlay=variant;
- const frames=variant>=3?mascotPeekFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,b.height,variant):mascotPlayFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,variant);
- const animation=sprite.animate(frames,{duration:variant>=3?1150:variant===2?2500:3400,easing:variant>=3?"linear":"ease-in-out",fill:"both"});
+ const order=mascotPeekOrder();
+ const frames=mascotPeekFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,b.height,order);
+ const animation=sprite.animate(frames,{duration:3400,easing:"linear",fill:"both"});
  mascotWander={sprite,animation};
  animation.onfinish=()=>{if(mascotWander?.sprite!==sprite)return;mascotWander=null;sprite.remove();header.classList.remove("wandering");scheduleMascotPlay(9000+Math.random()*5000)};
 }

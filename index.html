@@ -181,7 +181,11 @@ h1,h2{font-weight:700;color:#453025}
 #receipt-dialog .notice{margin-top:9px}
 @media(max-height:570px){.checkout-options{gap:4px;margin-top:2px}.checkout-choice{padding:5px 8px;gap:7px}.choice-icon{width:30px;height:30px}.choice-icon svg{width:20px;height:20px}.choice-copy{gap:1px}.checkout-panel{padding:6px;gap:3px}.chip{padding:5px 2px}.proof-button{min-height:28px}.proof-button svg{width:19px;height:19px}.demo-account{padding:3px 5px}.checkout-secondary{min-height:28px;margin-top:4px}.timeline-item{min-height:27px}.timeline-item i{width:23px;height:23px}.timeline-item:not(:last-child):after{right:11px}.timeline-item span{font-size:9px}.order-success{margin:1px auto}}
 @media(max-height:420px) and (min-width:600px){main[data-step="4"],main[data-step="5"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;column-gap:10px}main[data-step="4"]>.center,main[data-step="5"]>.center{grid-column:1/-1}main[data-step="4"]>.checkout-options,main[data-step="5"]>.checkout-options{grid-column:1;grid-row:2;align-self:start}main[data-step="4"]>.checkout-panel,main[data-step="5"]>.checkout-panel{grid-column:2;grid-row:2;align-self:start}main[data-step="4"]>.summary,main[data-step="5"]>.summary{grid-column:1/-1;grid-row:3}main[data-step="4"]>.checkout-spacer,main[data-step="5"]>.checkout-spacer{display:none}main[data-step="6"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto auto;gap:4px}main[data-step="6"]>.center:first-child{grid-column:1;grid-row:1;align-self:center}main[data-step="6"]>.timeline{grid-column:2;grid-row:1}main[data-step="6"]>.summary{grid-column:1/-1;grid-row:2}main[data-step="6"]>.hint{grid-column:1/-1;grid-row:3}main[data-step="6"]>.checkout-spacer{display:none}}
-.roadstage .road{overflow:hidden;will-change:contents;pointer-events:none}.roadstage .spring-house{pointer-events:none}</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
+.roadstage .road{overflow:hidden;will-change:contents;pointer-events:none}.roadstage .spring-house{pointer-events:none}
+/* The ring is suggested by a delicate elliptical showroom shadow. */
+.dessertstage::before{content:"";position:absolute;left:10%;right:10%;top:29%;bottom:13%;border-radius:50%;background:radial-gradient(ellipse at center,#b6996b0e 0%,#b6996b08 53%,transparent 75%);border:1px solid #c9b08a36;pointer-events:none}
+.dessertstage .spring-carousel{z-index:1}
+</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
@@ -349,14 +353,14 @@ function mountSpring(){
   layer=stage.querySelector(".carousel");layer.className="spring-carousel";
  }
  layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[i]||0))+'</div>').join("");
- scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step};
+ scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step,circular:step===2&&items.length>1};
  paintSpring();
 }
 function paintSpring(){
  const s=scene;if(!s)return;
  const w=s.stage.clientWidth,h=s.stage.clientHeight,side=clamp(w*.46,82,255);
  if(!w||!h)return;
- s.stage.style.setProperty("--art-width",Math.max(64,Math.min(w*.86,h*(s.step===2?1.78:1.45),s.step===2?330:365))+"px");
+ s.stage.style.setProperty("--art-width",Math.max(64,Math.min(w*(s.circular?.77:.86),h*(s.circular?1.45:1.45),s.step===2?330:365))+"px");
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){
   const lo=Math.floor(s.k),mix=s.k-lo,ease=mix*mix*(3-2*mix);
@@ -374,6 +378,17 @@ function paintSpring(){
    const scale=clamp(h/340,.57,1.08)*(1-.27*Math.min(d,1.8));
    el.style.visibility=Math.abs(dif)>1.75?"hidden":"visible";
    el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+clamp(s.velocity*10,-5,5)+"deg) scale("+scale+")";
+  }else if(s.circular){
+   // A true horizontal ring viewed from above: the front plate advances
+   // around an ellipse, while rear plates recede in perspective.
+   const angle=dif*2*Math.PI/s.items.length;
+   const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
+   const x=sine*w*.38,y=(front*.23-.065)*h,z=-depth*240;
+   const scale=1-depth*.47;
+   el.style.visibility="visible";
+   el.style.opacity=(1-depth*.62).toFixed(3);
+   el.style.zIndex=String(Math.round(1000-depth*900));
+   el.style.transform="translate(-50%,-50%) translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+clamp(-s.velocity*14,-5,5)+"deg) rotateY("+(sine*11).toFixed(1)+"deg) rotateZ("+(-sine*5).toFixed(1)+"deg) scale("+scale.toFixed(3)+")";
   }else{
    let x=sign*Math.min(d,1.25)*side,y=Math.min(d,2.5)*18,z=-Math.min(d,3)*240;
    el.style.transform="translate(-50%,-50%) translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+clamp(-s.velocity*25,-8,8)+"deg) rotateY("+(sign*Math.min(d,1.5)*9)+"deg) rotateZ("+(-sign*Math.min(d,2)*2.8)+"deg) scale("+(1-.13*Math.min(d,1))+")";
@@ -381,7 +396,7 @@ function paintSpring(){
  });
 }
 function commitSelection(index){
- let i=clamp(Math.round(index),0,catalog().length-1), old=selected();
+ let i=scene?.circular?wrap(Math.round(index)%catalog().length,catalog().length):clamp(Math.round(index),0,catalog().length-1), old=selected();
  if(i===old){if(scene){scene.k=i;scene.target=i;scene.velocity=0;paintSpring()}return}
  touched=true;saved=false;
  if(step===0)branch=i;
@@ -396,8 +411,10 @@ function tickSpring(now){
   s.velocity+=(s.target-s.k)*.07*dt;
   s.velocity*=Math.pow(.8,dt);
   s.k+=s.velocity*dt;
-  if(s.k<-.42){s.k=-.42;s.velocity=Math.max(0,s.velocity)}
-  if(s.k>s.items.length-1+.42){s.k=s.items.length-1+.42;s.velocity=Math.min(0,s.velocity)}
+  if(!s.circular){
+   if(s.k<-.42){s.k=-.42;s.velocity=Math.max(0,s.velocity)}
+   if(s.k>s.items.length-1+.42){s.k=s.items.length-1+.42;s.velocity=Math.min(0,s.velocity)}
+  }
  }
  paintSpring();
  if(!pointer&&Math.abs(s.k-s.target)<.002&&Math.abs(s.velocity)<.002){
@@ -409,7 +426,7 @@ function runSpring(){if(!raf){lastTime=0;raf=requestAnimationFrame(tickSpring)}}
 function navigate(delta){
  if(!scene||pointer)return;
  const s=scene,next=s.target+delta;
- s.target=clamp(next,0,s.items.length-1);
+ s.target=s.circular?next:clamp(next,0,s.items.length-1);
  if(reduceMotion.matches){commitSelection(s.target);return}
  if(next!==s.target)s.velocity=delta*.12;
  runSpring();
@@ -428,7 +445,7 @@ function flySweet(source,target,kind,reverse=false){
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
- if(scene&&Math.round(scene.target)!==selected())commitSelection(scene.target);
+ if(scene&&(scene.circular?wrap(Math.round(scene.target)%scene.items.length,scene.items.length):Math.round(scene.target))!==selected())commitSelection(scene.target);
  const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null;
  const beforePlate=step===2?scene?.els[sweet]?.getBoundingClientRect():null;
  const beforePiece=step===2?main.querySelector(".boxtray .piece[data-index='"+sweet+"']")?.getBoundingClientRect():null;
@@ -458,7 +475,7 @@ main.addEventListener("pointermove",e=>{
  const drag=s.vertical?Math.sign(primary)*Math.max(0,Math.abs(primary)-deadzone):primary;
  const raw=p.k-drag/(s.vertical?Math.max(220,s.stage.clientHeight*.62):160);
  const max=s.items.length-1,elastic=raw<0?raw*.32:raw>max?max+(raw-max)*.32:raw;
- const val=clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
+ const val=s.circular?raw:clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
  s.velocity=s.velocity*.5+(val-s.k)/dt*.5;s.k=val;p.last=now;paintSpring();
 });
 function release(e,canceled=false){
@@ -476,7 +493,7 @@ function release(e,canceled=false){
    else if(Math.abs(delta)>=85&&dest===p.from)dest=p.from+(delta<0?1:-1);
    dest=clamp(dest,p.from-1,p.from+1);
   }else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
-  s.target=clamp(dest,0,s.items.length-1);
+  s.target=s.circular?clamp(dest,p.from-2,p.from+2):clamp(dest,0,s.items.length-1);
  }else{s.target=p.from;s.velocity=0}
  if(reduceMotion.matches){commitSelection(s.target);return}
  runSpring();

@@ -535,7 +535,12 @@ let mascotTimer=0,mascotLast="",mascotStep=-1,mascotSelectionKey="";
 const mascotUsed=new Set();try{for(const x of JSON.parse(sessionStorage.getItem("sweettest:lawza:used")||"[]"))mascotUsed.add(x)}catch{}
 function mascotLine(action="step",delta=0,index=null){
  const b=data.branches[step===0&&index!==null?index:branch],bx=data.boxes[step===1&&index!==null?index:box],s=data.sweets[step===2&&index!==null?sweetIndices()[index]:sweet];
- const pick=arr=>arr.find(x=>!mascotUsed.has(x.trim()))||"";
+ const pick=arr=>{
+  const options=[...new Set(arr.map(x=>x.trim()).filter(Boolean))].filter(x=>x!==mascotLast);
+  const fresh=options.find(x=>!mascotUsed.has(x));if(fresh)return fresh;
+  // Rotate exhausted dialogue pools from oldest to newest instead of going silent.
+  const history=[...mascotUsed];return options.sort((a,b)=>history.indexOf(a)-history.indexOf(b))[0]||"";
+ };
  if(action==="branch-confirmed")return [pick(["تمام، من "+b.name+"! الحلا إلك ولا لمناسبة؟","اختيار موفّق! "+b.name+" رح يجهّزلك طلبك.","يلا من "+b.name+" نختار الحلا!","ثبتنا "+b.name+"، شو المناسبة؟","أحلى ضيافة من "+b.name+"!","صار فرعنا "+b.name+"، جاهز نكمّل؟"]),"excited"];
  if(delta>0&&boxFull()&&(action==="plus"||action.startsWith("set-weight:")))return [pick(["هيك البوكس صار كامل!","تمام! وصلنا للوزن المطلوب.","بوكس مليان حلا، صحتين!"]),"excited"];
  if(action.startsWith("set-weight:")&&delta!==0)return [pick(["تمام، "+s.name+" "+fmt(amounts[sweet]||0)+" كيلو!","عدّلنا الوزن، صار البوكس "+fmt(kg())+" كيلو.","تشكيلتك صارت "+fmt(kg())+" كيلو!"]),"happy"];
@@ -551,15 +556,18 @@ function mascotLine(action="step",delta=0,index=null){
  if(action==="delivery")return ["الحلا لحد بابك!","happy"];
  if(action==="cash"||action==="wallet")return ["تمام، هاي تجربة دفع بدون فلوس حقيقية.","happy"];
  if(action==="proof")return [proof?"وصل الإثبات التجريبي!":"بتقدر ترجع تضيف الإثبات.","happy"];
- if(action==="back")return ["عمهلك، اختار اللي بناسبك.","wink"];
+ if(action==="back"){
+  const where={0:["رجعنا للفروع، من وين بدك الحلا؟","يلا نشوف فرع تاني!","بدك تغيّر الفرع؟ على راحتك."],7:["حلا إلك ولا لمناسبة؟","لسه في مجال تغيّر نوع الطلب."],1:["رجعنا للبوكسات، اختار اللي بناسبك!","خلّينا نشوف بوكس تاني."],2:["رجعنا للحلا! عدّل تشكيلتك زي ما بتحب.","ناقصك شي بالبوكس؟"],3:["نراجع التشكيلة مرة تانية؟","خلّينا نتأكد من طلبك."],4:["بدك تغيّر طريقة الاستلام؟"],8:["خلّينا نراجع تفاصيل المناسبة."],9:["بنقدر نعدّل كمية الضيافة."]};
+  return [pick([...(where[step]||[]),"عمهلك، اختار اللي بناسبك.","ولا يهمك، منرجع خطوة.","خد راحتك، أنا معك!","لسه في وقت نعدّل."]),"wink"];
+ }
  if(action.startsWith("guests:"))return ["يا أهلاً بكل ضيوفك!","excited"];
  if(/^(occasion|eventday|eventtime|slot|zone):/.test(action))return ["تمام، سجّلت اختيارك!","happy"];
  if(action==="selection"||action.startsWith("jump-sweet:")){
-  if(step===0)return [pick(b.open?["يا هلا في "+b.name+"!",b.name+" ضمن خيارات التجربة!","من "+b.name+" بنجهّزلك الحلا.","بتحب نكمّل من "+b.name+"؟"]: [b.name+" مسكّر هلقيت.","هالفرع مش متاح للطلب حالياً.","خلّينا نشوف فرع تاني، "+b.name+" مغلق."]),"happy"];
+  if(step===0)return [pick(b.open?["يا هلا في "+b.name+"!",b.name+" ضمن خيارات التجربة!","من "+b.name+" بنجهّزلك الحلا.","بتحب نكمّل من "+b.name+"؟","وصلنا عند "+b.name+"، "+b.note+".","هاي "+b.name+"، شو رأيك؟","من هون ممكن تبدأ تشكيلتك: "+b.name+".","رحلتنا هلقيت عند "+b.name+"!"]: [b.name+" مسكّر هلقيت.","هالفرع مش متاح للطلب حالياً.","خلّينا نشوف فرع تاني، "+b.name+" مغلق."]),"happy"];
   if(step===1)return [pick([bx.name+"، بيساع "+fmt(bx.capacity)+" كيلو!","شو رأيك بـ"+bx.name+"؟",bx.desc+"!","اختيار حلو! "+fmt(bx.capacity)+" كيلو منوّعات.",bx.name+" جاهز لتشكيلتك.","خلّينا نعبّي "+bx.name+" على ذوقك!"]),"happy"];
   if(step===2)return [pick([s.name+"! جرّب منها ربع كيلو.","شو رأيك بـ"+s.name+"؟",s.desc+"، بتشهي!","من "+s.name+" بتبدأ اللقمة الحلوة!"]),"wink"];
  }
- const defaults={0:["يا هلا بالحلوين! اختار فرعك.","happy"],7:["حلا إلك ولا ضيافة لمناسبة؟","happy"],1:["أي بوكس خطف قلبك؟","wink"],2:["شكّل البوكس على ذوقك!","happy"],3:["شوف تشكيلتك قبل ما نكمّل.","happy"],4:["كيف بتحب يوصلك الحلا؟","happy"],5:["جاهزين للدفع التجريبي؟","happy"],8:["احكيلي عن المناسبة والضيوف!","excited"],9:["هاي الكمية المقترحة، شو رأيك؟","happy"]};
+ const defaults={0:[pick(["يا هلا بالحلوين! اختار فرعك.","من أي فرع بدك نجهّز الحلا؟","نورتنا! لفّ بين الفروع.","يلا نختار الفرع المناسب إلك."]),"happy"],7:[pick(["حلا إلك ولا ضيافة لمناسبة؟","لمين الحلا اليوم؟","شو نوع طلبنا؟"]),"happy"],1:[pick(["أي بوكس خطف قلبك؟","خلّينا نلاقي البوكس المناسب!","في بوكس لكل جمعة."]),"wink"],2:[pick(["شكّل البوكس على ذوقك!","كل النكهات قدّامك!","يلا نخلط الحلا."]),"happy"],3:[pick(["شوف تشكيلتك قبل ما نكمّل.","هيك صار طلبك!","راجع الكمية والسعر."]),"happy"],4:[pick(["كيف بتحب يوصلك الحلا؟","استلام من الفرع ولا توصيل؟","اختار طريقة الاستلام."]),"happy"],5:[pick(["جاهزين للدفع التجريبي؟","هاي آخر خطوة قبل التأكيد."]),"happy"],8:[pick(["احكيلي عن المناسبة والضيوف!","خلّينا نعرف تفاصيل الفرحة."]),"excited"],9:[pick(["هاي الكمية المقترحة، شو رأيك؟","حسبنا الضيافة على عدد الضيوف."]),"happy"]};
  if(step===6)return [["استلمنا طلبك التجريبي!","تأكدنا من طلبك!","بنجهّز أحلى تشكيلة!","الحلا صار جاهز!","صحتين وهنا!"][orderState]||"صحتين!",orderState===4?"excited":"happy"];
  return defaults[step]||defaults[0];
 }
@@ -638,9 +646,10 @@ function mascotSpeak(action="step",animate=true,delta=0,index=null){
  if(action==="step"&&!animate&&mascotStep===step)return;
  stopMascotWander();scheduleMascotPlay(3000);
  if(mascotStep!==step){mascotStep=step;mascotSelectionKey=""}
- const [raw,mood]=mascotLine(action,delta,index),line=raw.trim();
- if(!line||mascotUsed.has(line)||mascotLast===line)return;
- mascotLast=line;mascotUsed.add(line);try{sessionStorage.setItem("sweettest:lawza:used",JSON.stringify([...mascotUsed]))}catch{}
+ let [raw,mood]=mascotLine(action,delta,index),line=raw.trim();
+ if(!line||line===mascotLast){[raw,mood]=mascotLine("step");line=raw.trim()}
+ if(!line||line===mascotLast)return;
+ mascotLast=line;mascotUsed.delete(line);mascotUsed.add(line);try{sessionStorage.setItem("sweettest:lawza:used",JSON.stringify([...mascotUsed]))}catch{}
  speech.textContent=line;header.dataset.mood=mood;
  if(!animate||reduceMotion.matches)return;
  clearTimeout(mascotTimer);clearTimeout(mascotIdleTimer);mascotIdleTimer=0;header.classList.remove("talking");void header.offsetWidth;header.classList.add("talking");
@@ -759,15 +768,15 @@ function restoreJourney(snapshot){
   return true;
  }catch{return false}
 }
-function openRoute(path){
+function openRoute(path,speak=true){
  let next=readRoute(path);
  if(next===1&&mode==="event"){mode="regular";category="all";amounts={}}
  if((next===8||next===9)&&mode!=="event"){mode="event";category="all";amounts={};resetEvent()}
  if(next===9)slot=eventDay+" "+eventTime;
  if(next!==0&&next!==7&&!data.branches[branch].open){const available=data.branches.findIndex(x=>x.open);if(available<0)next=0;else branch=available}
- step=safeStep(next);routeReplace=true;draw();
+ step=safeStep(next);routeReplace=true;draw(speak);
 }
-window.addEventListener("popstate",()=>{touched=true;openRoute(location.pathname);persist()});
+window.addEventListener("popstate",()=>{touched=true;openRoute(location.pathname,false);mascotSpeak("back");persist()});
 function baseAction(a,render=true){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
 else if(step===0&&a.startsWith("resume:")){resumeSelection(a.slice(7))}
 else if(a==="continue"&&step===0&&data.branches[branch].open){rememberBranch();selectionId=null;amounts={};mode="regular";category="all";order=null;orderState=0;proof=false;step=7;}
@@ -804,7 +813,7 @@ else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
 else if(a==="restart"){selectionId=null;step=0;branch=preferredBranch();box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
 else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
-persist();if(render)draw(!((a==="continue"&&step===7)||(a==="event"&&step===8)))}
+persist();if(render)draw(false)}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea"))return;if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)");

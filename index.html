@@ -354,7 +354,7 @@ function choice(act,on,title,desc,icon){return '<button class="checkout-choice '
 function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" aria-pressed="'+on+'" data-act="'+esc(act)+'">'+esc(label)+'</button>'}
 function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
 function categoryBar(){return '<div class="category-bar" aria-label="أصناف الحلويات">'+categories.map(([id,label])=>chip("cat:"+id,category===id,label)).join("")+'</div>'}
-function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);const sequence=mode==="event"?[0,7,8,9,2,3,4,5,6]:[0,7,1,2,3,4,5,6];const progress=sequence.indexOf(step);document.getElementById("steps").innerHTML=sequence.map((_,i)=>'<i class="'+(i<=progress?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
+function draw(){syncRoute();main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);const sequence=mode==="event"?[0,7,8,9,2,3,4,5,6]:[0,7,1,2,3,4,5,6];const progress=sequence.indexOf(step);document.getElementById("steps").innerHTML=sequence.map((_,i)=>'<i class="'+(i<=progress?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
 if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب لاختيار الفرع أو اضغط على المحل</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
 if(step===7){
  main.innerHTML='<div class="center"><div class="eyebrow">اختيار نوع الطلب</div><h1>حلا اليوم ولا حلا المناسبة؟</h1><p class="hint">خلّينا نجهّزلك تجربة على قد فرحتك</p></div><div class="occasion-cards"><button class="occasion-card" data-act="regular"><div class="occasion-art">'+boxArt("small")+'</div><div><b>طلب زبون</b><small>نفسي بحلو، أو بدي أضيّف كم حدا</small></div><span>‹</span></button><button class="occasion-card" data-act="event"><div class="occasion-art">'+dessert("baklava",0)+'</div><div><b>حفلة أو مناسبة</b><small>عندي عزومة أو مناسبة وبدي ضيافة مرتّبة</small></div><span>‹</span></button></div><div class="checkout-spacer"></div><p class="hint center">'+esc(b.name)+'</p>';
@@ -391,7 +391,59 @@ if(step===6&&order){
  footer.innerHTML=orderState<4?primary("محاكاة المرحلة التالية","advance")+'<button class="secondary checkout-secondary" data-act="receipt">عرض تفاصيل الطلب</button>':primary("ابدأ تجربة جديدة","restart")+'<button class="secondary checkout-secondary" data-act="receipt">عرض تفاصيل الطلب</button>';
 }
 footer.insertAdjacentHTML("beforeend",'<div class="footnote"><a href="https://yoosal.net" target="_blank" rel="noopener">تطوير وكالة يوصل · YOOSAL</a></div>');mountSpring()}
-function persist(){if(mode==="event")return;try{localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}))}catch{}}
+const stepPaths={0:"/branches",7:"/order-type",1:"/packages",2:"/sweets",3:"/cart",4:"/fulfillment",5:"/payment",6:"/tracking",8:"/events",9:"/events/recommendation"};
+const routeTitles={0:"اختر الفرع",7:"نوع الطلب",1:"اختر البوكس",2:"شكّل البوكس",3:"السلة",4:"استلام الطلب",5:"الدفع",6:"متابعة الطلب",8:"ضيافة المناسبات",9:"التشكيلة المقترحة"};
+let routeReplace=true;
+function readRoute(path){const clean=path.replace(/\/+$/,"")||"/";return clean==="/"||clean==="/index.html"?0:Number(Object.keys(stepPaths).find(k=>stepPaths[k]===clean)??0)}
+function safeStep(next){
+ if(next===6&&!order)return kg()>0?3:2;
+ if([3,4,5].includes(next)&&kg()<=0)return 2;
+ return next;
+}
+function syncRoute(){
+ const path=stepPaths[step]||stepPaths[0];
+ document.title="حلويات | "+routeTitles[step];
+ if(location.pathname!==path){
+  if(routeReplace)history.replaceState({step},"",path);
+  else history.pushState({step},"",path);
+ }else if(history.state?.step!==step)history.replaceState({step},"",path);
+ routeReplace=false;
+}
+function persist(){
+ try{
+  if(mode!=="event")localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}));
+  sessionStorage.setItem("sweettest:journey:v2",JSON.stringify({branch,box,sweet,amounts,mode,category,occasion,guests,eventDay,eventTime,fulfillment,slot,zone,payment,proof,order,orderState}));
+ }catch{}
+}
+function restoreJourney(){
+ try{
+  const p=JSON.parse(sessionStorage.getItem("sweettest:journey:v2"));
+  if(!p||!Number.isInteger(p.branch)||!data.branches[p.branch]||!Number.isInteger(p.box)||!data.boxes[p.box]||!Number.isInteger(p.sweet)||!data.sweets[p.sweet])return false;
+  branch=p.branch;box=p.box;sweet=p.sweet;mode=p.mode==="event"?"event":"regular";
+  category=categories.some(x=>x[0]===p.category)?p.category:"all";
+  if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0;
+  occasion=["عيد ميلاد","خطوبة أو عرس","تخرّج","عزومة"].includes(p.occasion)?p.occasion:"عيد ميلاد";
+  guests=[10,20,30,50,75,100].includes(p.guests)?p.guests:20;
+  eventDay=["بكرا","بعد 3 أيام","الأسبوع الجاي"].includes(p.eventDay)?p.eventDay:"بكرا";
+  eventTime=["الصباح","الظهر","المساء"].includes(p.eventTime)?p.eventTime:"المساء";
+  fulfillment=p.fulfillment==="delivery"?"delivery":"pickup";slot=typeof p.slot==="string"?p.slot:"20 دقيقة";
+  zone=["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].includes(p.zone)?p.zone:"المنطقة الأولى";
+  payment=p.payment==="cash"?"cash":"wallet";proof=p.proof===true;
+  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v<=5&&v%.5===0&&kg()+v<=capacity())amounts[i]=v;
+  order=p.order&&typeof p.order.id==="string"&&Array.isArray(p.order.items)?p.order:null;
+  orderState=Number.isInteger(p.orderState)?Math.max(0,Math.min(4,p.orderState)):0;
+  return true;
+ }catch{return false}
+}
+function openRoute(path){
+ let next=readRoute(path);
+ if(next===1&&mode==="event"){mode="regular";category="all";amounts={}}
+ if((next===8||next===9)&&mode!=="event"){mode="event";category="all";amounts={};resetEvent()}
+ if(next===9)slot=eventDay+" "+eventTime;
+ if(next!==0&&next!==7&&!data.branches[branch].open){const available=data.branches.findIndex(x=>x.open);if(available<0)next=0;else branch=available}
+ step=safeStep(next);routeReplace=true;draw();
+}
+window.addEventListener("popstate",()=>{touched=true;openRoute(location.pathname);persist()});
 function baseAction(a){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
 else if(a==="continue"&&step===0&&data.branches[branch].open)step=7;
 else if(a==="regular"&&step===7){if(mode==="event")amounts={};mode="regular";category="all";slot="20 دقيقة";proof=false;step=1}
@@ -424,7 +476,7 @@ else if(a==="advance"&&step===6&&order)orderState=Math.min(4,orderState+1);
 else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
 else if(a==="restart"){step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
-else if(a==="back"&&step>0&&step!==6){if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
+else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
 persist();draw()}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
@@ -636,6 +688,6 @@ main.addEventListener("click",e=>{if(Date.now()<suppress){e.preventDefault();e.s
 window.addEventListener("resize",()=>paintSpring(),{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>paintSpring(),{passive:true});
 function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%0.5===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
-restore();draw();
-const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=fictionalize(d);branch=box=sweet=0;amounts={};restore();draw()}}).catch(()=>{});
+if(!restoreJourney())restore();openRoute(location.pathname);
+const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=fictionalize(d);branch=box=sweet=0;amounts={};if(!restoreJourney())restore();openRoute(location.pathname)}}).catch(()=>{});
 </script></body></html>

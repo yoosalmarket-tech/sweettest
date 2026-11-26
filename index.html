@@ -965,15 +965,15 @@ function mountSpring(){
    buildings+=shop(180+side*158,y-22,.88)+shop(180-side*158,y+88,.72);
   }
   const roadId=uid();
-  const grain=Array.from({length:160},(_,i)=>{const x=(i*37.17)%48,y=(i*19.73)%48;return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+(.25+(i%5)*.11)+'" fill="'+(i%3===0?"#fff8e9":"#b99b73")+'" opacity="'+(i%3===0?.23:.25)+'"/>'}).join("");
-  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#f8edda"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#e0c8a3"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'+buildings
+  const grain=Array.from({length:160},(_,i)=>{const x=(i*37.17)%48,y=(i*19.73)%48;return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+(.25+(i%5)*.11)+'" fill="'+(i%3===0?"#bbbdbd":"#23272a")+'" opacity="'+(i%3===0?.23:.25)+'"/>'}).join("");
+  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#52565a"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#d1c9bb"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'+buildings
    +'<path d="'+d+'" fill="none" stroke="#82776b" stroke-width="84" opacity=".20"/>'
    +'<path d="'+d+'" fill="none" stroke="url(#'+roadId+'paving)" stroke-width="78"/>'
    +'<path d="'+d+'" fill="none" stroke="#e6dfd1" stroke-width="65"/>'
-   +'<path d="'+d+'" fill="none" stroke="#c6ae88" stroke-width="61"/>'
-   +'<path d="'+d+'" fill="none" stroke="#e0c8a3" stroke-width="58"/>'
+   +'<path d="'+d+'" fill="none" stroke="#85817b" stroke-width="61"/>'
+   +'<path d="'+d+'" fill="none" stroke="#d9d5ca" stroke-width="58"/>'
    +'<path d="'+d+'" fill="none" stroke="url(#'+roadId+'asphalt)" stroke-width="54"/>'
-   +'<path d="'+d+'" fill="none" stroke="#c19c6c" stroke-width="1.8" stroke-dasharray="10 12" stroke-linecap="butt" opacity=".94"/>'+scenery;
+   +'<path d="'+d+'" fill="none" stroke="#f7f4e8" stroke-width="1.8" stroke-dasharray="10 12" stroke-linecap="butt" opacity=".94"/>'+scenery;
   path={road,roadX,roadY};
   layer=document.createElement("div");layer.className="spring-carousel";
   stage.insertBefore(layer,stage.querySelector(".arrow-stack"));

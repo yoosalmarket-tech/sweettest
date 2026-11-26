@@ -491,13 +491,14 @@ function choice(act,on,title,desc,icon){return '<button class="checkout-choice '
 function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" aria-pressed="'+on+'" data-act="'+esc(act)+'">'+esc(label)+'</button>'}
 function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
 function categoryBar(){return '<div class="category-bar" aria-label="أصناف الحلويات">'+categories.map(([id,label])=>chip("cat:"+id,category===id,label)).join("")+'</div>'}
-let mascotTimer=0,mascotLast="";
-function mascotLine(action="step",delta=0){
- const b=data.branches[branch],bx=data.boxes[box],s=data.sweets[sweet];
- const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
- if(action==="plus"&&delta>0)return [kg()>=capacity()?"هيك البوكس صار كامل!":pick(["يا سلام عالذوق!","ربع كيلو من السعادة!","هاي اللقمة إلها ناسها!","شكله بوكس بيفتح النفس!"]),"excited"];
- if((action==="minus"||action==="remove")&&delta<0)return ["ولا يهمك، التشكيلة على ذوقك!","wink"];
- if(action.startsWith("cat:"))return ["خلّيني أفرجيك شو عنا بهالصنف!","happy"];
+let mascotTimer=0,mascotLast="",mascotStep=-1,mascotSelectionKey="";
+const mascotUsed=new Set();try{for(const x of JSON.parse(sessionStorage.getItem("sweettest:lawza:used")||"[]"))mascotUsed.add(x)}catch{}
+function mascotLine(action="step",delta=0,index=null){
+ const b=data.branches[step===0&&index!==null?index:branch],bx=data.boxes[step===1&&index!==null?index:box],s=data.sweets[step===2&&index!==null?sweetIndices()[index]:sweet];
+ const pick=arr=>arr.find(x=>!mascotUsed.has(x.trim()))||"";
+ if(action==="plus"&&delta>0)return [kg()>=capacity()?"هيك البوكس صار كامل!":pick(["يا سلام عالذوق!","ربع كيلو من السعادة!","هاي اللقمة إلها ناسها!","شكله بوكس بيفتح النفس!","هيني ضفتلك منها!","كل لقمة أحلى من التانية!","اختيار بيفرّح القلب!","حلا فوق حلا!",s.name+" صارت "+fmt(amounts[sweet]||0)+" كيلو بالبوكس!","صار عنا "+fmt(kg())+" كيلو من الحلا!"]),"excited"];
+ if((action==="minus"||action==="remove")&&delta<0)return [pick(["ولا يهمك، التشكيلة على ذوقك!","هيك أزبط؟","منرجّعها عالصحن.","خد راحتك بالتعديل.","خلّينا نوازن التشكيلة!","صار وزن البوكس "+fmt(kg())+" كيلو."]),"wink"];
+ if(action.startsWith("cat:"))return [pick(["يلا نشوف "+(categories.find(x=>x[0]===category)?.[1]||"الحلويات")+"!","خلّينا نغيّر النكهة!","في اختيارات حلوة هون كمان!"]),"happy"];
  if(action.startsWith("resume:"))return ["أهلين من جديد! نكمّل حلاك؟","excited"];
  if(action==="regular")return ["حلا اليوم إله طعم تاني!","happy"];
  if(action==="event")return ["مبروك سلف! خلّينا نرتّب الضيافة.","excited"];
@@ -511,22 +512,32 @@ function mascotLine(action="step",delta=0){
  if(action.startsWith("guests:"))return ["يا أهلاً بكل ضيوفك!","excited"];
  if(/^(occasion|eventday|eventtime|slot|zone):/.test(action))return ["تمام، سجّلت اختيارك!","happy"];
  if(action==="selection"||action.startsWith("jump-sweet:")){
-  if(step===0)return [b.open?"هاد الفرع جاهز يستقبلك!":"هاد الفرع مسكّر هلقيت.","happy"];
-  if(step===1)return [bx.name+"، بيساع "+fmt(bx.capacity)+" كيلو!","happy"];
-  if(step===2)return [s.name+"! جرّب منها ربع كيلو.","wink"];
+  if(step===0)return [pick(b.open?["يا هلا في "+b.name+"!",b.name+" فاتح وجاهز يستقبلك!","من "+b.name+" بنجهّزلك الحلا.","بتحب نكمّل من "+b.name+"؟"]: [b.name+" مسكّر هلقيت.","هالفرع مش متاح للطلب حالياً.","خلّينا نشوف فرع تاني، "+b.name+" مغلق."]),"happy"];
+  if(step===1)return [pick([bx.name+"، بيساع "+fmt(bx.capacity)+" كيلو!","شو رأيك بـ"+bx.name+"؟",bx.desc+"!","اختيار حلو! "+fmt(bx.capacity)+" كيلو منوّعات.",bx.name+" جاهز لتشكيلتك.","خلّينا نعبّي "+bx.name+" على ذوقك!"]),"happy"];
+  if(step===2)return [pick([s.name+"! جرّب منها ربع كيلو.","شو رأيك بـ"+s.name+"؟",s.desc+"، بتشهي!","من "+s.name+" بتبدأ اللقمة الحلوة!"]),"wink"];
  }
  const defaults={0:["يا هلا بالحلوين! اختار فرعك.","happy"],7:["حلا إلك ولا ضيافة لمناسبة؟","happy"],1:["أي بوكس خطف قلبك؟","wink"],2:["شكّل البوكس على ذوقك!","happy"],3:["شوف تشكيلتك قبل ما نكمّل.","happy"],4:["كيف بتحب يوصلك الحلا؟","happy"],5:["جاهزين للدفع التجريبي؟","happy"],8:["احكيلي عن المناسبة والضيوف!","excited"],9:["هاي الكمية المقترحة، شو رأيك؟","happy"]};
  if(step===6)return [["استلمنا طلبك التجريبي!","تأكدنا من طلبك!","بنجهّز أحلى تشكيلة!","الحلا صار جاهز!","صحتين وهنا!"][orderState]||"صحتين!",orderState===4?"excited":"happy"];
  return defaults[step]||defaults[0];
 }
-function mascotSpeak(action="step",animate=true,delta=0){
+function mascotSpeak(action="step",animate=true,delta=0,index=null){
  const header=document.getElementById("mascot-header"),speech=document.getElementById("mascot-speech");if(!header||!speech)return;
- const [line,mood]=mascotLine(action,delta);
- if(!animate&&mascotLast===line)return;
- mascotLast=line;speech.textContent=line;header.dataset.mood=mood;
+ if(action==="step"&&!animate&&mascotStep===step)return;
+ if(mascotStep!==step){mascotStep=step;mascotSelectionKey=""}
+ const [raw,mood]=mascotLine(action,delta,index),line=raw.trim();
+ if(!line||mascotUsed.has(line)||mascotLast===line)return;
+ mascotLast=line;mascotUsed.add(line);try{sessionStorage.setItem("sweettest:lawza:used",JSON.stringify([...mascotUsed]))}catch{}
+ speech.textContent=line;header.dataset.mood=mood;
  if(!animate||reduceMotion.matches)return;
  clearTimeout(mascotTimer);header.classList.remove("talking");void header.offsetWidth;header.classList.add("talking");
  mascotTimer=setTimeout(()=>header.classList.remove("talking"),850);
+}
+function mascotSelection(target){
+ if(!scene||![0,1,2].includes(step))return;
+ const n=scene.items.length,i=scene.circular?wrap(Math.round(target)%n,n):clamp(Math.round(target),0,n-1);
+ const key=step+":"+(step===2?category+":"+sweetIndices()[i]:i);
+ if(key===mascotSelectionKey)return;
+ mascotSpeak("selection",true,0,i);mascotSelectionKey=key;
 }
 document.getElementById("mascot-button").addEventListener("click",()=>mascotSpeak("step"));
 function trayPieces(){return Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<button type="button" class="piece '+(Number(i)===sweet?'active-piece':'')+'" data-index="'+i+'" data-act="jump-sweet:'+i+'" aria-label="عرض '+esc(data.sweets[i].name)+'" aria-pressed="'+(Number(i)===sweet)+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></button>').join("");}
@@ -787,7 +798,7 @@ function commitSelection(index){
  if(step===0)branch=i;
  else if(step===1){box=i;amounts={}}
  else if(step===2)sweet=sweetIndices()[i];
- persist();draw();mascotSpeak("selection");
+ persist();draw();mascotSelection(i);
 }
 function tickSpring(now){
  raf=0;const s=scene;if(!s)return;
@@ -812,6 +823,7 @@ function navigate(delta){
  if(!scene||pointer)return;
  const s=scene,next=s.target+delta;
  s.target=s.circular?next:clamp(next,0,s.items.length-1);
+ if(s.target!==next-delta)mascotSelection(s.target);
  if(reduceMotion.matches){commitSelection(s.target);return}
  if(next!==s.target)s.velocity=delta*.12;
  runSpring();
@@ -871,10 +883,10 @@ function expandSweetWheel(s){
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
- if(step===2&&a.startsWith("select-plate:")&&scene){const i=Number(a.slice(13)),n=scene.items.length;if(Number.isInteger(i)&&i>=0&&i<n){const target=i+Math.round((scene.k-i)/n)*n;scene.target=target;scene.velocity=0;if(reduceMotion.matches)commitSelection(target);else runSpring()}return}
+ if(step===2&&a.startsWith("select-plate:")&&scene){const i=Number(a.slice(13)),n=scene.items.length;if(Number.isInteger(i)&&i>=0&&i<n){const target=i+Math.round((scene.k-i)/n)*n;scene.target=target;scene.velocity=0;mascotSelection(target);if(reduceMotion.matches)commitSelection(target);else runSpring()}return}
  if(step===2&&a.startsWith("jump-sweet:")&&scene){
   const i=Number(a.slice(11)),index=sweetIndices().indexOf(i);
-  if(index>=0&&(amounts[i]||0)>0){const n=scene.items.length;const target=index+Math.round((scene.k-index)/n)*n;scene.target=target;scene.velocity=0;if(reduceMotion.matches)commitSelection(target);else runSpring();return}
+  if(index>=0&&(amounts[i]||0)>0){const n=scene.items.length;const target=index+Math.round((scene.k-index)/n)*n;scene.target=target;scene.velocity=0;mascotSelection(target);if(reduceMotion.matches)commitSelection(target);else runSpring();return}
  }
  const quantityAction=step===2&&["plus","minus","remove"].includes(a)&&!!scene;
  if(quantityAction){
@@ -953,6 +965,7 @@ function release(e,canceled=false){
   else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
   s.target=s.wheel?dest:s.circular?clamp(dest,p.from-2,p.from+2):clamp(dest,0,s.items.length-1);
  }else{s.target=s.wheel?Math.round(s.k):p.from;s.velocity=0}
+ if(p.axis&&!canceled&&Math.round(s.target)!==Math.round(p.k))mascotSelection(s.target);
  if(reduceMotion.matches){commitSelection(s.target);return}
  runSpring();
 }

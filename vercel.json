@@ -1,0 +1,44 @@
+{
+  "rewrites": [
+    {
+      "source": "/branches",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/order-type",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/packages",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sweets",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cart",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/fulfillment",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/payment",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/tracking",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/events",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/events/recommendation",
+      "destination": "/index.html"
+    }
+  ]
+}

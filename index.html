@@ -286,6 +286,14 @@ body{font-family:"Thmanyah UI","IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
 main[data-step="2"] .sweet-name{font-size:clamp(20px,5.8vw,27px)}
 @media(max-height:570px){.package-info{gap:2px}.package-info .package-actions{margin-top:3px}.package-actions .primary,.package-actions .secondary{min-height:34px;padding:5px;font-size:12px}main[data-step="2"] .sweet-name{font-size:clamp(18px,5vw,23px)}}
 @media(max-height:420px){.package-actions .primary,.package-actions .secondary{min-height:30px;font-size:11px}main[data-step="2"] .sweet-name{font-size:17px}}
+
+.dots-count{font-size:11px;color:#94764f;font-variant-numeric:tabular-nums;padding:2px}
+.sweet-controls .category-bar .chip{flex:1;min-width:0;font-size:clamp(10px,2.8vw,13px);padding-inline:2px}
+.boxtray{display:flex;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;scrollbar-width:thin}
+.boxtray .piece{flex:0 0 calc((100% - 12px)/4);min-width:0;flex-shrink:0}
+.boxtray .piece b{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
+@media(max-height:570px){.dots-count{padding:0;font-size:10px}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
@@ -298,18 +306,35 @@ const packageExtras=[
 ];
 const packageDescriptions={box:"ضيافة كبيرة لكل العيلة",small:"اختيار خفيف إلك وللي بتحبهم",plate:"صحن أنيق لجَمعة حلوة"};
 function enrichPackages(boxes){return [...boxes.map(x=>({...x,desc:x.desc||packageDescriptions[x.kind]||"تشكيلة على ذوقك"})),...packageExtras.filter(x=>!boxes.some(b=>b.kind===x.kind))]}
+const extraSweets=[
+ {name:"خيوط الشمس",desc:"كنافة خشنة بالجبنة والقشطة",price:105,kind:"coarse",category:"kunafa"},
+ {name:"حرير القشطة",desc:"كنافة ناعمة بقشطة بلدية",price:95,kind:"creamkunafa",category:"kunafa"},
+ {name:"وشاح الورد",desc:"بقلاوة بالجوز وماء الورد",price:105,kind:"walnut",category:"oriental"},
+ {name:"لؤلؤة اللوز",desc:"نمورة باللوز المحمّص",price:80,kind:"almond",category:"oriental"},
+ {name:"عشّ الزمرد",desc:"عش البلبل بالفستق الحلبي",price:125,kind:"nest",category:"oriental"},
+ {name:"لفائف السعادة",desc:"لفائف رقائق محشوة بالفستق",price:110,kind:"roll",category:"oriental"},
+ {name:"قمر القشطة",desc:"قطايف بالقشطة ولمسة قطر",price:85,kind:"qatayef",category:"special"},
+ {name:"نجمة التمر",desc:"معمول بالتمر والقرفة",price:65,kind:"datecookie",category:"cookies"},
+ {name:"حبة فرح",desc:"معمول بالفستق وعجينة زبدية",price:100,kind:"pistachiocookie",category:"cookies"},
+ {name:"ندى السكر",desc:"غريبة ناعمة بالزبدة",price:60,kind:"ghraybeh",category:"cookies"},
+ {name:"سحابة جوز الهند",desc:"كرات جوز الهند المحمّصة",price:75,kind:"coconut",category:"cookies"},
+ {name:"سرّ الكاكاو",desc:"كرات الشوكولاتة بالبندق",price:115,kind:"chocolate",category:"special"}
+];
+const originalCategories=["kunafa","oriental","kunafa","oriental"];
+function enrichSweets(items){return [...items.slice(0,4).map((s,i)=>({...s,category:originalCategories[i]})),...extraSweets]}
 fallback.boxes=enrichPackages(fallback.boxes);
+fallback.sweets=enrichSweets(fallback.sweets);
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
 let fulfillment="pickup",slot="20 دقيقة",zone="المنطقة الأولى",payment="wallet",proof=false,order=null,orderState=0;
 let mode="regular",category="all",occasion="عيد ميلاد",guests=20,eventDay="بكرا",eventTime="المساء";
 const eventWeight=()=>Math.ceil(guests*.15*2)/2;
-const categories=[["all","الكل"],["kunafa","كنافة"],["oriental","حلويات شرقية"]];
-const sweetIndices=()=>data.sweets.map((s,i)=>i).filter(i=>category==="all"||(category==="kunafa"?["kunafa","arabic"].includes(data.sweets[i].kind):["baklava","basbousa"].includes(data.sweets[i].kind)));
+const categories=[["all","الكل"],["kunafa","كنافة"],["oriental","شرقية"],["cookies","معمول"],["special","مميزة"]];
+const sweetIndices=()=>data.sweets.map((s,i)=>i).filter(i=>category==="all"||data.sweets[i].category===category);
 const eventLabel=()=>occasion+" · "+guests+" ضيف · "+eventDay+" "+eventTime;
 function resetEvent(){occasion="عيد ميلاد";guests=20;eventDay="بكرا";eventTime="المساء"}
 const deliveryFee=()=>fulfillment==="delivery"?10:0, grandTotal=()=>total()+deliveryFee();
 const demoNames=[["لمسة ذهب","كنافة ذهبية بالجبنة والفستق"],["غيمة عسل","سميد محمّص بلمسة قطر"],["ليالي العنبر","كنافة عربية بالجوز والقرفة"],["تاج الفستق","رقائق مقرمشة وحشوة فستق"]];
-function fictionalize(d){return {...d,boxes:enrichPackages(d.boxes),sweets:d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc}))}}
+function fictionalize(d){return {...d,boxes:enrichPackages(d.boxes),sweets:enrichSweets(d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc})))}}
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
@@ -350,7 +375,10 @@ const servingCapacity=5;
 const plateNumber=q=>Math.floor(Math.max(0,q)/servingCapacity);
 const plateUsed=q=>Math.max(0,q)%servingCapacity;
 function servingArt(kind,q){return dessert(kind,plateUsed(q))}
+const roundKinds=["kunafa","arabic","coarse","creamkunafa"];
+const specialColors={coarse:["#d88e25","#f6bf55","#a95520","#fff0cf","#824414"],creamkunafa:["#e8af53","#ffe3a0","#b17b3d","#fff6df","#a06727"],walnut:["#b97b43","#f4cd86","#80502d","#d8ab71","#653b22"],almond:["#c58c3f","#f2d09a","#99632d","#f5dfb1","#805029"],nest:["#c9a151","#f9dc8e","#987039","#c2c772","#745128"],roll:["#cfa04e","#f6df9b","#996637","#b3be63","#744423"],qatayef:["#e1ac66","#ffe0a7","#ae7441","#fff3da","#976032"],datecookie:["#c59761","#f5d8a3","#95683d","#79502e","#684122"],pistachiocookie:["#ceb174","#fae8ba","#a78750","#91a04b","#796536"],ghraybeh:["#e0cda1","#fff6d8","#b7a17a","#f8ebce","#987e51"],coconut:["#d2b583","#fff6df","#aa8251","#fff8e9","#917048"],chocolate:["#65402d","#af7952","#44291d","#a37b4e","#332119"]};
 function sweetColors(kind){
+ if(specialColors[kind]){const [top,light,side,cut,dark]=specialColors[kind];return {top,light,side,cut,dark}}
  return kind==="kunafa"?{top:"#e59a24",light:"#ffd474",side:"#ad611f",cut:"#fff1bf",dark:"#7e4216"}:kind==="arabic"?{top:"#a8662d",light:"#edb66b",side:"#753d22",cut:"#c38a48",dark:"#59301d"}:kind==="baklava"?{top:"#d6a343",light:"#f9dc96",side:"#8b582a",cut:"#eed3a1",dark:"#744625"}:{top:"#cb8a36",light:"#f3c66e",side:"#a4612b",cut:"#efd09a",dark:"#865020"}
 }
 function portionAngles(i){let a=Math.PI/2-Math.PI/portionCount+i*2*Math.PI/portionCount;return [a,a+2*Math.PI/portionCount]}
@@ -360,7 +388,8 @@ function down(p){return [p[0],p[1]+19]}
 function sliceTop(i){let [a,b]=portionAngles(i);return "M160 90 L"+coord(ellipsePoint(a))+" A117 44 0 0 1 "+coord(ellipsePoint(b))+" Z"}
 function foodDefs(id,c){return '<defs>'+gradient(id+"top",[c.light,c.top,c.dark], "12%","0%","89%","100%")+gradient(id+"side",[c.top,c.side,c.dark],"0%","0%","0%","100%")+gradient(id+"cut",[c.light,c.cut,c.side],"0%","0%","0%","100%")+gradient(id+"porcelain",["#fffefa","#f5ead7","#b69c76"])+radial(id+"well",["#fffdf4","#f4e8d4","#dac5a6"])+radial(id+"shadow",["#69482b50","#69482b00"])+'</defs>'}
 function pieceArt(kind){
- const id=uid(),c=sweetColors(kind),round=kind==="kunafa"||kind==="arabic";
+ if(specialColors[kind]&&!roundKinds.includes(kind)&&!["walnut","almond"].includes(kind)){const id=uid(),c=sweetColors(kind);return '<svg viewBox="0 0 100 76" aria-hidden="true">'+foodDefs(id,c)+'<ellipse cx="50" cy="61" rx="38" ry="10" fill="'+paint(id+"shadow")+'"/><g transform="translate(50 33) scale(2.2)">'+individualSweet(kind,id,c,0)+'</g></svg>'}
+ const id=uid(),c=sweetColors(kind),round=roundKinds.includes(kind);
  const top=round?"M14 40 69 14Q93 29 87 41L14 40Z":"M12 30 65 9 90 28 38 50Z";
  const front=round?"M14 40 87 41V57L14 56Z":"M38 50 90 28V48L38 70Z";
  const left=round?"M14 40 69 14 69 30 14 56Z":"M12 30 38 50V70L12 49Z";
@@ -369,9 +398,19 @@ function pieceArt(kind){
  let garnish=Array.from({length:13},(_,i)=>{let x=43+(i*13%28),y=round?31+(i*7%7):24+(i*7%12);return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+(1+i%2)+'" ry=".9" fill="'+(i%3?"#8a923d":"#526030")+'" transform="rotate('+i*34+' '+x+' '+y+')"/>'}).join("");
  return '<svg viewBox="0 0 100 76" aria-hidden="true">'+foodDefs(id,c)+'<ellipse cx="51" cy="64" rx="43" ry="9" fill="'+paint(id+"shadow")+'"/><path d="'+left+'" fill="'+paint(id+"side")+'" stroke="'+c.dark+'" stroke-width=".6"/><path d="'+front+'" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".6"/>'+lines+'<path d="'+top+'" fill="'+paint(id+"top")+'" stroke="'+c.side+'" stroke-width=".7"/>'+garnish+'</svg>'
 }
+function individualSweet(kind,id,c,i){
+ const top=paint(id+"top"),side=paint(id+"side"),cut=paint(id+"cut");
+ const base='<ellipse cy="7" rx="18" ry="8" fill="'+c.dark+'" opacity=".2"/>';
+ const nuts='<g fill="#7b873d"><ellipse cx="-4" cy="-3" rx="2.6" ry="1.3"/><ellipse cx="3" cy="-1" rx="2.2" ry="1.4"/><ellipse cx="0" cy="2" rx="2" ry="1.1"/></g>';
+ if(kind==="nest")return base+'<ellipse cy="4" rx="17" ry="9" fill="'+side+'"/><ellipse cy="0" rx="17" ry="10" fill="'+top+'"/>'+Array.from({length:8},(_,j)=>'<ellipse rx="'+(16-j*.9)+'" ry="'+(9-j*.45)+'" transform="rotate('+(j*9-28)+')" fill="none" stroke="'+(j%2?c.dark:c.light)+'" stroke-width=".6"/>').join("")+'<ellipse rx="9" ry="5" fill="#6a7438"/>'+nuts;
+ if(kind==="roll")return base+'<g transform="rotate(-15)"><rect x="-18" y="-8" width="31" height="17" rx="7" fill="'+side+'"/><rect x="-18" y="-10" width="31" height="14" rx="6" fill="'+top+'"/><ellipse cx="13" cy="-3" rx="6" ry="7" fill="'+cut+'"/><ellipse cx="13" cy="-3" rx="3" ry="4" fill="#697438"/><path d="M-12 -7v7M-5 -9v8M3 -9v8" stroke="'+c.light+'" opacity=".8"/></g>';
+ if(kind==="qatayef")return base+'<path d="M-18 0Q0 -19 18 0L15 8Q0 18 -15 8Z" fill="'+side+'"/><path d="M-18 0Q0 -21 18 0Q0 13 -18 0Z" fill="'+top+'"/><path d="M-17 1Q0 13 17 1" fill="none" stroke="'+c.light+'" stroke-width="2"/><path d="M-10 6Q0 13 10 6" fill="none" stroke="'+c.cut+'" stroke-width="2"/>';
+ if(kind==="datecookie"||kind==="pistachiocookie"||kind==="ghraybeh")return base+'<ellipse cy="3" rx="16" ry="10" fill="'+side+'"/><ellipse cy="-2" rx="16" ry="11" fill="'+top+'"/>'+Array.from({length:10},(_,j)=>{let a=j*Math.PI/5;return '<path d="M'+(Math.cos(a)*7).toFixed(2)+' '+(Math.sin(a)*5-2).toFixed(2)+'L'+(Math.cos(a)*14).toFixed(2)+' '+(Math.sin(a)*9-2).toFixed(2)+'" stroke="'+c.side+'" stroke-width=".9" opacity=".75"/>'}).join("")+'<ellipse cy="-2" rx="4" ry="3" fill="'+(kind==="pistachiocookie"?"#809445":kind==="datecookie"?"#81522b":"#f6eed8")+'"/>';
+ return base+'<ellipse cy="1" rx="15" ry="12" fill="'+side+'"/><ellipse cy="-3" rx="15" ry="12" fill="'+top+'"/>'+Array.from({length:18},(_,j)=>{const a=j*2.39996,r=Math.sqrt((j+.5)/18);return '<ellipse cx="'+(Math.cos(a)*13*r).toFixed(2)+'" cy="'+(Math.sin(a)*10*r-3).toFixed(2)+'" rx="1.2" ry=".65" fill="'+(kind==="coconut"?"#fff4d7":j%2?"#d0a46b":"#37251c")+'"/>'}).join("");
+}
 function dessert(kind,removedKg=0){
  const id=uid(),c=sweetColors(kind),missing=Math.min(portionCount,Math.max(0,Math.round(removedKg/quantityStep)));
- const round=kind==="kunafa"||kind==="arabic",order=round?Array.from({length:portionCount},(_,i)=>i%2===0?(portionCount-Math.floor(i/2))%portionCount:Math.ceil(i/2)):Array.from({length:portionCount},(_,i)=>portionCount-1-i),gone=new Set(order.slice(0,missing));
+ const round=roundKinds.includes(kind),order=round?Array.from({length:portionCount},(_,i)=>i%2===0?(portionCount-Math.floor(i/2))%portionCount:Math.ceil(i/2)):Array.from({length:portionCount},(_,i)=>portionCount-1-i),gone=new Set(order.slice(0,missing));
  const active=Array.from({length:portionCount},(_,i)=>i).filter(i=>!gone.has(i));
  let food="";
  if(round){
@@ -384,17 +423,19 @@ function dessert(kind,removedKg=0){
  let texture=Array.from({length:220},(_,i)=>{let a=i*2.39996,r=Math.sqrt((i+.5)/220),x=160+Math.cos(a)*115*r,y=90+Math.sin(a)*42*r;let tone=i%4===0?c.dark:i%4===1?c.light:c.top;return '<path d="M'+n2(x)+' '+n2(y)+'q'+n2(Math.cos(i)*2)+' -1.6 '+n2(Math.sin(i)*3.5)+' 1" fill="none" stroke="'+tone+'" stroke-width=".9" opacity=".68" stroke-linecap="round"/>'}).join("");
  let garnish=Array.from({length:52},(_,i)=>{let a=i*2.39996,r=(i%7<3?.17:.76)+(i%3)*.035,x=160+Math.cos(a)*104*r,y=90+Math.sin(a)*36*r;return '<ellipse cx="'+n2(x)+'" cy="'+n2(y)+'" rx="'+(1.2+i%3*.7)+'" ry="1.15" fill="'+(kind==="arabic"?(i%2?"#e0b875":"#78502b"):(i%3?"#899544":"#4f602f"))+'" transform="rotate('+i*29+' '+n2(x)+' '+n2(y)+')"/>'}).join("");
  food=sides+tops+'<clipPath id="'+clip+'">'+active.map(i=>'<path d="'+sliceTop(i)+'"/>').join("")+'</clipPath><g clip-path="url(#'+clip+')">'+texture+garnish+'</g>';
+ }else if(["nest","roll","qatayef","datecookie","pistachiocookie","ghraybeh","coconut","chocolate"].includes(kind)){
+ food=active.map(i=>{const row=Math.floor(i/5),col=i%5;return '<g transform="translate('+(65+col*45+(row%2?9:0))+' '+(70+row*19-col*1.5)+')">'+individualSweet(kind,id,c,i)+'</g>'}).join("");
  }else{
  const cells=active.map(i=>{let row=Math.floor(i/5),col=i%5,x=48+col*38+row*10,y=56+row*19-col*2;
  const top="M"+x+" "+y+"l30 -2 19 16 -30 3Z",front="M"+(x+19)+" "+(y+17)+"l30 -3v13l-30 3Z",left="M"+x+" "+y+"l19 17v13l-19 -17Z";
  let layers=Array.from({length:4},(_,j)=>'<path d="M'+(x+20)+' '+(y+19+j*2.5)+'l28 -3" stroke="'+(j%2?c.side:c.light)+'" stroke-width=".9" opacity=".8"/>').join("");
- let garnish=kind==="baklava"?Array.from({length:10},(_,j)=>'<ellipse cx="'+(x+19+(j*5%15))+'" cy="'+(y+5+j%5*2)+'" rx="1.4" ry=".9" fill="'+(j%2?"#778740":"#52602e")+'"/>').join(""):'<ellipse cx="'+(x+28)+'" cy="'+(y+9)+'" rx="4" ry="2.6" fill="#efd6a0" stroke="#ae7d44" stroke-width=".6"/><path d="M'+(x+26)+' '+(y+8)+'l4 2" stroke="#fff0ce" stroke-width=".8"/>';
+ let garnish=["baklava","walnut"].includes(kind)?Array.from({length:10},(_,j)=>'<ellipse cx="'+(x+19+(j*5%15))+'" cy="'+(y+5+j%5*2)+'" rx="1.4" ry=".9" fill="'+(j%2?"#778740":"#52602e")+'"/>').join(""):'<ellipse cx="'+(x+28)+'" cy="'+(y+9)+'" rx="4" ry="2.6" fill="#efd6a0" stroke="#ae7d44" stroke-width=".6"/><path d="M'+(x+26)+' '+(y+8)+'l4 2" stroke="#fff0ce" stroke-width=".8"/>';
  return '<g><path d="'+left+'" fill="'+paint(id+"side")+'"/><path d="'+front+'" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".55"/>'+layers+'<path d="'+top+'" fill="'+paint(id+"top")+'" stroke="'+c.side+'" stroke-width=".75"/>'+garnish+'</g>'}).join("");
  food=cells;
  }
  return '<svg viewBox="0 0 320 174" aria-hidden="true">'+foodDefs(id,c)+'<ellipse cx="160" cy="146" rx="144" ry="24" fill="'+paint(id+"shadow")+'"/><ellipse cx="160" cy="119" rx="143" ry="49" fill="#a99273"/><ellipse cx="160" cy="110" rx="143" ry="49" fill="'+paint(id+"porcelain")+'" stroke="#bfa57f" stroke-width="1.2"/><ellipse cx="160" cy="110" rx="133" ry="42" fill="none" stroke="#c3a16b" stroke-width=".8"/><ellipse cx="160" cy="110" rx="121" ry="36" fill="'+paint(id+"well")+'" stroke="#dac6a7" stroke-width=".8"/><path d="M38 101Q72 64 142 63" stroke="#fffdf7" fill="none" stroke-width="1.4" stroke-linecap="round"/>'+food+'</svg>'
 }
-function dots(n,i){return '<div class="dots">'+Array.from({length:n},(_,k)=>'<span class="'+(i===k?"on":"")+'"></span>').join("")+'</div>'}
+function dots(n,i){if(n>8)return '<div class="dots-count" dir="ltr">'+(i+1)+' / '+n+'</div>';return '<div class="dots">'+Array.from({length:n},(_,k)=>'<span class="'+(i===k?"on":"")+'"></span>').join("")+'</div>'}
 function nav(i,n){return '<div class="nav"><button class="round" data-act="prev" aria-label="السابق">‹</button>'+dots(n,i)+'<button class="round" data-act="next" aria-label="التالي">›</button></div>'}
 function primary(label,act,disabled=false){return '<button class="primary" data-act="'+act+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
 
@@ -508,7 +549,7 @@ else if(step===8&&a.startsWith("eventday:"))eventDay=a.slice(9);
 else if(step===8&&a.startsWith("eventtime:"))eventTime=a.slice(10);
 else if(a==="event-plan"&&step===8)step=9;
 else if(step===9&&(a==="event-preset"||a==="event-custom")){amounts={};category="all";sweet=0;box=0;slot=eventDay+" "+eventTime;if(a==="event-preset"){for(let k=0;k<Math.round(eventWeight()/quantityStep);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+quantityStep}}step=2}
-else if(step===2&&a.startsWith("jump-sweet:")){const i=Number(a.slice(11));if(Number.isInteger(i)&&data.sweets[i]&&(amounts[i]||0)>0){if(!sweetIndices().includes(i))category=["kunafa","arabic"].includes(data.sweets[i].kind)?"kunafa":"oriental";sweet=i}}
+else if(step===2&&a.startsWith("jump-sweet:")){const i=Number(a.slice(11));if(Number.isInteger(i)&&data.sweets[i]&&(amounts[i]||0)>0){if(!sweetIndices().includes(i))category=data.sweets[i].category||"all";sweet=i}}
 else if(step===2&&a.startsWith("cat:")){const next=a.slice(4);if(categories.some(x=>x[0]===next)){category=next;if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0}}
 else if(a==="custom"&&step===1)step=2;
 else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()/quantityStep);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+quantityStep}step=2}
@@ -610,14 +651,16 @@ function paintSpring(){
   }else if(s.circular){
    // A true horizontal ring viewed from above: the front plate advances
    // around an ellipse, while rear plates recede in perspective.
-   const angle=dif*2*Math.PI/s.items.length;
+   const count=s.items.length,rel=((dif+count/2)%count+count)%count-count/2;
+   const angle=rel*2*Math.PI/Math.min(count,5);
    const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
    const x=sine*w*.38+(s.items.length===2?depth*w*.24:0),y=(front*.23-.065)*h,z=-depth*240;
    const scale=1-depth*.47;
-   el.style.visibility="visible";
-   el.style.opacity=(1-depth*.62).toFixed(3);
+   const visible=Math.abs(rel)<=2.35;
+   el.style.visibility=visible?"visible":"hidden";
+   el.style.opacity=(visible?1-depth*.62:0).toFixed(3);
    el.style.zIndex=String(Math.round(1000-depth*900));
-   const nearby=front<.85;const tappable=s.step===2&&nearby;
+   const nearby=visible&&front<.85;const tappable=s.step===2&&nearby;
    el.classList.toggle("sweet-neighbor",tappable);el.tabIndex=tappable?0:-1;
    if(tappable){el.dataset.act="select-plate:"+i;el.setAttribute("role","button");el.setAttribute("aria-label","عرض "+s.items[i].name)}else{delete el.dataset.act;el.removeAttribute("role");el.removeAttribute("aria-label")}
    el.style.transform="translate(-50%,-50%) translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+clamp(-s.velocity*14,-5,5)+"deg) rotateY("+(sine*11).toFixed(1)+"deg) rotateZ("+(-sine*5).toFixed(1)+"deg) scale("+scale.toFixed(3)+")";

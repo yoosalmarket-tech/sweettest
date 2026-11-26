@@ -242,6 +242,14 @@ body{font-family:"Thmanyah UI","IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
 .package-info .hint,main[data-step="2"]>.center:first-child .hint{font-size:clamp(14px,4.1vw,18px);line-height:1.45;color:#6b5440;font-weight:500}
 @media(max-height:570px){.package-info .hint,main[data-step="2"]>.center:first-child .hint{font-size:13px;line-height:1.35}}
 @media(max-height:420px){.package-info .hint,main[data-step="2"]>.center:first-child .hint{font-size:12px}}
+
+/* Prominent product names and reversible serving-plate exchange. */
+.package-info h2,main[data-step="2"] .sweet-name{font-size:clamp(26px,8vw,36px);font-weight:700;line-height:1.18;letter-spacing:0}
+.exchange-plate{width:100%;position:relative;will-change:transform,opacity}
+.exchange-plate.exchange-outgoing{position:absolute;inset:0}
+.exchange-plate svg{width:100%;display:block}
+@media(max-height:570px){.package-info h2,main[data-step="2"] .sweet-name{font-size:clamp(22px,6.4vw,29px)}}
+@media(max-height:420px){.package-info h2,main[data-step="2"] .sweet-name{font-size:20px}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
@@ -269,7 +277,7 @@ function fictionalize(d){return {...d,boxes:enrichPackages(d.boxes),sweets:d.swe
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
-const money=n=>fmt(n)+" ₪", capacity=()=>mode==="event"?Math.min(data.sweets.length*5,Math.max(eventWeight()+3,5)):data.boxes[box].capacity;
+const money=n=>fmt(n)+" ₪", capacity=()=>mode==="event"?Math.max(eventWeight()+3,5):data.boxes[box].capacity;
 
 /* Lightweight illustrated showroom assets. Every SVG has its own paint IDs. */
 let paintId=0;
@@ -301,6 +309,10 @@ function boxArt(kind){
  return frame('<g '+(mini?'transform="translate(54 39) scale(.66)"':long?'transform="translate(0 23) scale(1 .84)"':'')+'><path d="M29 93 168 38 291 78 150 145Z" fill="'+paint(id+"paper")+'" stroke="#a77c4d"/><path d="M29 93V142L150 188V145Z" fill="'+(gift?"#a77452":"#c1a078")+'"/><path d="M150 145 291 78V126L150 188Z" fill="'+(gift?"#79503b":"#94724c")+'"/><path d="M29 91 168 34 291 74 150 139Z" fill="'+(gift?paint(id+"dark"):paint(id+"paper"))+'" stroke="#a07a50"/><path d="M43 91 168 42 277 76 150 131Z" fill="none" stroke="#d6b77f" stroke-width="1.4"/>'+(gift?'<path d="M101 62 126 52 250 92 228 102Z" fill="'+paint(id+"gold")+'"/><path d="M81 112 223 52 246 59 103 120Z" fill="'+paint(id+"gold")+'"/><path d="M153 83Q108 32 132 38Q153 41 160 81Q196 38 216 57Q226 73 166 85" fill="none" stroke="#e0bd79" stroke-width="8" stroke-linecap="round"/>':'')+'<g transform="translate(160 87) rotate(-13)"><ellipse rx="42" ry="19" fill="'+(gift?"#e4c58c":"#6c4c31")+'" stroke="#b68e51"/><text text-anchor="middle" y="4" font-size="13" font-family="Georgia" fill="'+(gift?"#553522":"#f6dbab")+'">'+(mini?"PETIT":gift?"GIFT":"GATHER")+'</text></g></g>');
 }
 const portionCount=10;
+const servingCapacity=5;
+const plateNumber=q=>Math.floor(Math.max(0,q)/servingCapacity);
+const plateUsed=q=>Math.max(0,q)%servingCapacity;
+function servingArt(kind,q){return dessert(kind,plateUsed(q))}
 function sweetColors(kind){
  return kind==="kunafa"?{top:"#e59a24",light:"#ffd474",side:"#ad611f",cut:"#fff1bf",dark:"#7e4216"}:kind==="arabic"?{top:"#a8662d",light:"#edb66b",side:"#753d22",cut:"#c38a48",dark:"#59301d"}:kind==="baklava"?{top:"#d6a343",light:"#f9dc96",side:"#8b582a",cut:"#eed3a1",dark:"#744625"}:{top:"#cb8a36",light:"#f3c66e",side:"#a4612b",cut:"#efd09a",dark:"#865020"}
 }
@@ -370,7 +382,7 @@ if(step===9){
  footer.innerHTML=primary("اعتمد التشكيلة المقترحة","event-preset")+'<button class="secondary checkout-secondary" data-act="event-custom">بدي أشكّل الضيافة بنفسي</button>';
 }
 if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار لتشوف باقي التشكيلات</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div></div></div>'+nav(box,data.boxes.length);footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
-if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+categoryBar()+nav(selected(),catalog().length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+((kg()+.5>capacity()||(amounts[sweet]||0)>=5)?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
+if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">شكّل البوكس</div><h2 class="sweet-name" style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+categoryBar()+nav(selected(),catalog().length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
 
 if(step===3){
  main.innerHTML='<div class="center"><div class="eyebrow">مراجعة السلة</div><h1>تشكيلة على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(mode==="event"?eventLabel():bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><p class="hint center">الأسعار والتشكيلة لأغراض العرض فقط</p>';
@@ -429,7 +441,7 @@ function restoreJourney(){
   fulfillment=p.fulfillment==="delivery"?"delivery":"pickup";slot=typeof p.slot==="string"?p.slot:"20 دقيقة";
   zone=["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].includes(p.zone)?p.zone:"المنطقة الأولى";
   payment=p.payment==="cash"?"cash":"wallet";proof=p.proof===true;
-  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v<=5&&v%.5===0&&kg()+v<=capacity())amounts[i]=v;
+  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%.5===0&&kg()+v<=capacity())amounts[i]=v;
   order=p.order&&typeof p.order.id==="string"&&Array.isArray(p.order.items)?p.order:null;
   orderState=Number.isInteger(p.orderState)?Math.max(0,Math.min(4,p.orderState)):0;
   return true;
@@ -457,7 +469,7 @@ else if(step===9&&(a==="event-preset"||a==="event-custom")){amounts={};category=
 else if(step===2&&a.startsWith("cat:")){const next=a.slice(4);if(categories.some(x=>x[0]===next)){category=next;if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0}}
 else if(a==="custom"&&step===1)step=2;
 else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()*2);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+.5}step=2}
-else if(a==="plus"&&step===2&&kg()+.5<=capacity()&&(amounts[sweet]||0)<5)amounts[sweet]=(amounts[sweet]||0)+.5;
+else if(a==="plus"&&step===2&&kg()+.5<=capacity())amounts[sweet]=(amounts[sweet]||0)+.5;
 else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-.5);
 else if(a==="remove"&&step===2)delete amounts[sweet];
 else if(a==="review"&&step===2&&kg()>0)step=3;
@@ -511,7 +523,7 @@ function mountSpring(){
  }else{
   layer=stage.querySelector(".carousel");layer.className="spring-carousel";
  }
- layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[sweetIndices()[i]]||0))+'</div>').join("");
+ layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):servingArt(x.kind,amounts[sweetIndices()[i]]||0))+'</div>').join("");
  scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step,circular:(step===1||step===2)&&items.length>1,wheel:step===1&&items.length>1,shown:k};
  paintSpring();
 }
@@ -521,7 +533,7 @@ function paintSpring(){
  if(!w||!h)return;
  const artWidth=Math.max(64,s.wheel?Math.min(w*.52,h*.70,230):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
  s.stage.style.setProperty("--art-width",artWidth+"px");
- if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.min(Math.max(0,h-88),Math.max(h*.64,h*.27+artWidth*220/320/2+24)))+"px");
+ if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.min(Math.max(0,h-108),Math.max(h*.64,h*.27+artWidth*220/320/2+24)))+"px");
  if(s.wheel){const index=wrap(Math.round(s.k)%s.items.length,s.items.length);if(index!==s.shown){s.shown=index;const x=s.items[index];document.getElementById("package-name").textContent=x.name;document.getElementById("package-desc").textContent=x.desc;document.getElementById("package-capacity").textContent=fmt(x.capacity)+" كيلو";main.querySelectorAll(".dots span").forEach((dot,i)=>dot.classList.toggle("on",i===index))}}
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){
@@ -604,29 +616,54 @@ function navigate(delta){
  runSpring();
 }
 
-function flySweet(source,target,kind,reverse=false){
+function flySweet(source,target,kind,reverse=false,delay=0){
  if(reduceMotion.matches||!source||!target||!Element.prototype.animate)return;
  const el=document.createElement("div");el.className="fly-sweet";el.innerHTML=pieceArt(kind);
  const w=Math.max(35,Math.min(94,source.width*.5)),height=w*.76;
  const x=source.left+source.width/2-w/2,y=source.top+source.height*.58-height/2;
  Object.assign(el.style,{left:x+"px",top:y+"px",width:w+"px",height:height+"px"});document.body.appendChild(el);
  const dx=target.left+target.width/2-x-w/2,dy=target.top+target.height*(reverse?.56:.5)-y-height/2;
- const anim=el.animate([{transform:"translate3d(0,0,0) scale(.8)",opacity:1},{transform:"translate3d("+dx*.32+"px,"+(dy*.18-18)+"px,0) scale(1)",opacity:1,offset:.25},{transform:"translate3d("+dx+"px,"+dy+"px,0) scale(.48)",opacity:.15}],{duration:590,easing:"cubic-bezier(.22,.65,.3,1)"});
+ const anim=el.animate([{transform:"translate3d(0,0,0) scale(.8)",opacity:1},{transform:"translate3d("+dx*.32+"px,"+(dy*.18-18)+"px,0) scale(1)",opacity:1,offset:.25},{transform:"translate3d("+dx+"px,"+dy+"px,0) scale(.48)",opacity:.15}],{duration:590,delay,easing:"cubic-bezier(.22,.65,.3,1)",fill:"backwards"});
  const remove=()=>el.remove();anim.onfinish=remove;anim.oncancel=remove;
+}
+
+function animatePlateExchange(kind,oldQty,newQty){
+ const item=scene?.els[selected()];
+ if(!item||reduceMotion.matches||!Element.prototype.animate||plateNumber(oldQty)===plateNumber(newQty))return false;
+ const backwards=newQty<oldQty,dir=backwards?-1:1;
+ const incoming=document.createElement("div");incoming.className="exchange-plate";
+ const outgoing=document.createElement("div");outgoing.className="exchange-plate exchange-outgoing";
+ // Forward: last portion leaves the empty plate. Reverse: the full current
+ // plate slides out and the preceding empty plate comes back.
+ outgoing.innerHTML=dessert(kind,backwards?plateUsed(oldQty):servingCapacity);
+ incoming.innerHTML=backwards?dessert(kind,servingCapacity):servingArt(kind,newQty);
+ item.replaceChildren(outgoing,incoming);
+ outgoing.animate([{transform:"translateX(0) scale(1)",opacity:1},{transform:"translateX("+(-dir*112)+"%) scale(.86)",opacity:0}],{duration:330,easing:"cubic-bezier(.42,0,.8,1)",fill:"both"});
+ const arrive=incoming.animate([{transform:"translateX("+(dir*112)+"%) scale(.86)",opacity:0},{transform:"translateX(0) scale(1)",opacity:1}],{duration:370,delay:65,easing:"cubic-bezier(.2,.8,.25,1)",fill:"both"});
+ arrive.onfinish=()=>{
+  if(!item.isConnected)return;
+  outgoing.remove();
+  if(!backwards){item.innerHTML=servingArt(kind,newQty);return}
+  // Hold the returning empty plate until the flying portion lands.
+  const wait=incoming.animate([{opacity:1},{opacity:1}],{duration:320});
+  wait.onfinish=()=>{if(item.isConnected){item.innerHTML=servingArt(kind,newQty);item.firstElementChild?.animate([{opacity:.72},{opacity:1}],{duration:160})}};
+ };
+ return true;
 }
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
  if(scene&&(scene.circular?wrap(Math.round(scene.target)%scene.items.length,scene.items.length):Math.round(scene.target))!==selected())commitSelection(scene.target);
- const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null;
+ const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null,oldQty=step===2?(amounts[sweet]||0):0;
  const beforePlate=step===2?scene?.els[selected()]?.getBoundingClientRect():null;
  const beforePiece=step===2?main.querySelector(".boxtray .piece[data-index='"+sweet+"']")?.getBoundingClientRect():null;
  baseAction(a);
+ const exchanged=step===2&&before===2&&["plus","minus","remove"].includes(a)?animatePlateExchange(kind,oldQty,amounts[sweet]||0):false;
  if(step===2&&before===2&&kg()>old&&a==="plus"){
   const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']");
   if(target){flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
  }
- if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true);
+ if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true,exchanged?160:0);
  if(before!==step&&!reduceMotion.matches){
   main.animate([{opacity:0,transform:"translateY("+(a==="back"?-14:14)+"px)"},{opacity:1,transform:"translateY(0)"}],{duration:310,easing:"cubic-bezier(.2,.8,.2,1)"});
  }

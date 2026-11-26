@@ -666,7 +666,11 @@ function paintSpring(){
  const infoHeight=packageInfo?.offsetHeight||130;
  const artWidth=Math.max(52,s.wheel?Math.min(w*.52,h*.70,230,Math.max(52,(h*.73-infoHeight-12)*2*320/220)):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
  s.stage.style.setProperty("--art-width",artWidth+"px");
- if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.max(0,Math.min(h-infoHeight-5,h*.27+artWidth*220/320/2+clamp(h*.10,16,42))))+"px");
+ if(s.wheel){
+  const previousTop=h*.27+artWidth*220/320/2+clamp(h*.10,16,42);
+  const lowerTop=Math.max(h*.65,previousTop+clamp(h*.10,24,55));
+  s.stage.style.setProperty("--package-info-top",Math.round(Math.max(0,Math.min(h-infoHeight-5,lowerTop)))+"px");
+ }
  if(s.wheel){const index=wrap(Math.round(s.k)%s.items.length,s.items.length);if(index!==s.shown){s.shown=index;const x=s.items[index];document.getElementById("package-name").textContent=x.name;document.getElementById("package-desc").textContent=x.desc;document.getElementById("package-capacity").textContent=fmt(x.capacity)+" كيلو";main.querySelectorAll(".dots span").forEach((dot,i)=>dot.classList.toggle("on",i===index))}}
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){

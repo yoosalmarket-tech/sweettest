@@ -207,9 +207,29 @@ main[data-step="7"] .checkout-spacer{display:none}
 main[data-step="8"] .checkout-panel{margin-top:clamp(1px,1dvh,9px)}
 @media(max-height:570px){.category-bar .chip{padding:3px 1px;font-size:10px}.occasion-card{padding:5px}.occasion-art{width:30%}.occasion-card>div:nth-child(2){gap:2px}.event-grid{gap:3px}main[data-step="8"] .checkout-panel{margin-top:0}}
 @media(max-height:420px) and (min-width:600px){.occasion-cards{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr}main[data-step="8"]{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto minmax(0,1fr);gap:5px}main[data-step="8"]>.center{grid-column:1/-1}main[data-step="8"]>.checkout-spacer{display:none}}
+
+/* Package wheel: fixed name and description above a pure 2D orbit. */
+.package-heading{padding-top:clamp(4px,2dvh,18px);display:grid;justify-items:center;gap:3px}
+.package-heading h1{font-size:clamp(21px,6.2vw,31px);margin:2px 0}
+.package-capacity{display:inline-flex;padding:4px 13px;border:1px solid #d6bc95;border-radius:999px;background:#fff8e8;color:#87643b;font-size:12px;font-weight:bold}
+.package-wheel{perspective:none;overflow:hidden}
+.package-wheel .spring-carousel{transform-style:flat}
+.package-wheel .spring-item{transform-origin:center center}
+.package-wheel .spring-item svg{filter:drop-shadow(0 5px 5px #78583624)}
+@media(max-height:570px){.package-heading{padding-top:0;gap:1px}.package-heading h1{font-size:19px}.package-capacity{padding:2px 8px;font-size:10px}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
+const packageExtras=[
+ {name:"علبة لقمة",capacity:.5,kind:"mini",desc:"لقمات صغيرة تحلّي يومك"},
+ {name:"بوكس الهدية",capacity:1.5,kind:"gift",desc:"هدية مرتّبة لحدا غالي"},
+ {name:"صينية المشاركة",capacity:2.5,kind:"tray",desc:"تشكيلة حلوة لجَمعة الأصحاب"},
+ {name:"علبة العنبر",capacity:3,kind:"tin",desc:"علبة فاخرة بتفاصيل ذهبية"},
+ {name:"بوكس السهرة",capacity:4,kind:"long",desc:"ضيافة بتجمع كل اللي بتحبهم"}
+];
+const packageDescriptions={box:"ضيافة كبيرة لكل العيلة",small:"اختيار خفيف إلك وللي بتحبهم",plate:"صحن أنيق لجَمعة حلوة"};
+function enrichPackages(boxes){return [...boxes.map(x=>({...x,desc:x.desc||packageDescriptions[x.kind]||"تشكيلة على ذوقك"})),...packageExtras.filter(x=>!boxes.some(b=>b.kind===x.kind))]}
+fallback.boxes=enrichPackages(fallback.boxes);
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
 let fulfillment="pickup",slot="20 دقيقة",zone="المنطقة الأولى",payment="wallet",proof=false,order=null,orderState=0;
 let mode="regular",category="all",occasion="عيد ميلاد",guests=20,eventDay="بكرا",eventTime="المساء";
@@ -220,7 +240,7 @@ const eventLabel=()=>occasion+" · "+guests+" ضيف · "+eventDay+" "+eventTime
 function resetEvent(){occasion="عيد ميلاد";guests=20;eventDay="بكرا";eventTime="المساء"}
 const deliveryFee=()=>fulfillment==="delivery"?10:0, grandTotal=()=>total()+deliveryFee();
 const demoNames=[["لمسة ذهب","كنافة ذهبية بالجبنة والفستق"],["غيمة عسل","سميد محمّص بلمسة قطر"],["ليالي العنبر","كنافة عربية بالجوز والقرفة"],["تاج الفستق","رقائق مقرمشة وحشوة فستق"]];
-function fictionalize(d){return {...d,sweets:d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc}))}}
+function fictionalize(d){return {...d,boxes:enrichPackages(d.boxes),sweets:d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc}))}}
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
@@ -237,12 +257,23 @@ function home(active){
  const id=uid();
  return '<svg viewBox="0 0 200 172" aria-hidden="true"><defs>'+gradient(id+"wall",["#fff2d9","#e4c59a","#b88b61"])+gradient(id+"roof",["#b27848","#75442f","#41271e"])+gradient(id+"glass",["#d4e6dc","#6f8b80","#3a514b"])+gradient(id+"awning",["#c89959","#8c5933"])+radial(id+"shadow",["#77533350","#77533300"])+'</defs><ellipse cx="102" cy="154" rx="91" ry="16" fill="'+paint(id+"shadow")+'"/><path d="M27 70 145 70 176 54 176 139 145 156 27 147Z" fill="#a77c56"/><path d="M145 70 176 54V139L145 156Z" fill="#b38c66"/><path d="M27 70 145 70V156L27 147Z" fill="'+paint(id+"wall")+'" stroke="#a9825d" stroke-width=".8"/><path d="M17 72 84 15 158 70 145 78 84 32 31 79Z" fill="'+paint(id+"roof")+'"/><path d="M84 15 113 9 187 59 158 70Z" fill="#a7774e"/><path d="M84 32 145 78 27 72Z" fill="#efd3ad"/><path d="M32 74 144 79" stroke="#c39868" stroke-width="3"/><rect x="39" y="82" width="93" height="19" rx="3" fill="#57382a" stroke="#b58b55"/><text x="85.5" y="95.5" font-size="11" text-anchor="middle" fill="#f5d79c" font-family="Tahoma,Arial">حلويات</text><path d="M30 103H141L151 116H22Z" fill="'+paint(id+"awning")+'"/><path d="M22 116H151V120Q145 125 139 120Q132 125 125 120Q118 125 111 120Q104 125 97 120Q90 125 83 120Q76 125 69 120Q62 125 55 120Q48 125 41 120Q30 125 22 120Z" fill="#84512f"/><path d="M39 121H76V143L39 140Z M96 121H130V147L96 145Z" fill="'+paint(id+"glass")+'" stroke="#7a5437" stroke-width="2"/><path d="M42 125 69 125 M45 139 70 139 M99 126 126 126 M99 141 126 142" stroke="#d8c195" stroke-width="1.5"/><g fill="#f3bd72"><circle cx="51" cy="134" r="2.5"/><circle cx="59" cy="134" r="2.5"/><circle cx="68" cy="134" r="2.5"/><circle cx="108" cy="136" r="2.5"/><circle cx="117" cy="136" r="2.5"/></g><path d="M79 121H92V148L79 147Z" fill="#6c4b36"/><path d="M82 124H89V142H82Z" fill="#b4c4ae"/><circle cx="90" cy="144" r="1" fill="#f3c981"/><path d="M154 93 168 85V116L154 124Z" fill="#6e8174" stroke="#876648" stroke-width="1.5"/><path d="M17 148 147 158 185 141" fill="none" stroke="#a87e55" stroke-width="2" stroke-linecap="round"/></svg>'
 }
-function boxArt(kind){
+function standardBoxArt(kind){
  const id=uid();
  const defs='<defs>'+radial(id+"shadow",["#76533355","#76533300"])+gradient(id+"paper",["#fff7e5","#e6cca3","#c6a176"])+gradient(id+"side",["#c9a478","#9c704b"])+gradient(id+"ribbon",["#927042","#c8a161","#8c6439"])+gradient(id+"plate",["#fffdf5","#e5d5bc","#ab8c66"])+radial(id+"well",["#fffef8","#f1e3cb","#d6bb92"])+'</defs>';
  if(kind==="plate")return '<svg viewBox="0 0 320 220" aria-hidden="true">'+defs+'<ellipse cx="160" cy="153" rx="146" ry="51" fill="'+paint(id+"shadow")+'"/><ellipse cx="160" cy="119" rx="139" ry="65" fill="#9c7c58"/><ellipse cx="160" cy="112" rx="140" ry="66" fill="'+paint(id+"plate")+'" stroke="#ad8d5c" stroke-width="1.4"/><ellipse cx="160" cy="112" rx="131" ry="59" fill="none" stroke="#bf9a5c" stroke-width="1.1"/><ellipse cx="160" cy="112" rx="110" ry="46" fill="'+paint(id+"well")+'" stroke="#d5c09c"/><ellipse cx="160" cy="110" rx="104" ry="42" fill="none" stroke="#fffaf0" stroke-width="1.3"/><path d="M44 88Q90 48 160 51" fill="none" stroke="#fffdf4" stroke-width="2" stroke-linecap="round"/></svg>';
  const small=kind==="small";
  return '<svg viewBox="0 0 320 220" aria-hidden="true">'+defs+'<ellipse cx="160" cy="183" rx="145" ry="28" fill="'+paint(id+"shadow")+'"/><g '+(small?'transform="translate(33 15) scale(.8 .88)"':'')+'><path d="M29 95 171 43 292 78 151 143Z" fill="#cfad7e"/><path d="M29 95V143L151 194V143Z" fill="'+paint(id+"side")+'" stroke="#9d754d" stroke-width="1"/><path d="M151 143 292 78V126L151 194Z" fill="#997047" stroke="#805b3d" stroke-width="1"/><path d="M27 91 169 34 294 71 152 137Z" fill="'+paint(id+"paper")+'" stroke="#a88251" stroke-width="1"/><path d="M27 91 152 137V149L27 103Z" fill="#d4b68a"/><path d="M152 137 294 71V83L152 149Z" fill="#b18d60"/><path d="M46 92 170 43 276 75 152 129Z" fill="none" stroke="#b89965" stroke-width="1.3"/><path d="M46 92 152 129" stroke="#fff8e7" stroke-width="1.2"/><path d="M110 57 134 48 256 89 233 100Z" fill="'+paint(id+"ribbon")+'" opacity=".92"/><path d="M233 100 256 89V147L233 158Z" fill="#b38b51"/><path d="M83 115 225 53 248 60 105 124Z" fill="'+paint(id+"ribbon")+'" opacity=".92"/><path d="M83 115 105 124V174L83 165Z" fill="#b28a51"/><g transform="translate(158 87) rotate(-15)"><ellipse rx="37" ry="19" fill="#62442d" stroke="#efce8e" stroke-width="1.5"/><ellipse rx="33" ry="15.5" fill="none" stroke="#bd9457" stroke-width=".7"/><text y="4" text-anchor="middle" fill="#f8dfac" font-size="12" font-family="Georgia,serif">SWEETS</text><path d="M-5 -11 0 -15 5 -11 0 -8Z" fill="#dfb56f"/></g><path d="M32 110 149 155V188" fill="none" stroke="#efcf9e" stroke-width="1" opacity=".65"/></g></svg>'
+}
+
+function boxArt(kind){
+ if(!["mini","gift","tray","tin","long"].includes(kind))return standardBoxArt(kind);
+ const id=uid();
+ const defs='<defs>'+gradient(id+"gold",["#fae6b2","#c09859","#846138"])+gradient(id+"paper",["#fff2d4","#e4c59c","#b98e61"])+gradient(id+"dark",["#8a6140","#5b3827","#38251d"])+radial(id+"shadow",["#63452455","#63452400"])+'</defs>';
+ const frame=content=>'<svg viewBox="0 0 320 220" aria-hidden="true">'+defs+'<ellipse cx="160" cy="179" rx="130" ry="30" fill="'+paint(id+"shadow")+'"/>'+content+'</svg>';
+ if(kind==="tin")return frame('<ellipse cx="160" cy="143" rx="113" ry="43" fill="#735032"/><path d="M47 94V143a113 43 0 0 0 226 0V94" fill="'+paint(id+"dark")+'" stroke="#775334"/><ellipse cx="160" cy="94" rx="115" ry="51" fill="'+paint(id+"gold")+'" stroke="#9b7545"/><ellipse cx="160" cy="94" rx="105" ry="44" fill="#65452f" stroke="#f1cf8a"/><ellipse cx="160" cy="94" rx="93" ry="36" fill="none" stroke="#d0a663"/><text x="160" y="100" text-anchor="middle" font-family="Georgia" font-size="20" fill="#f4d9a2">AMBER</text>');
+ if(kind==="tray")return frame('<path d="M27 100 176 49 292 91 144 157Z" fill="#aa8255"/><path d="M27 100V124L144 180V157Z" fill="#b78f63"/><path d="M144 157 292 91V114L144 180Z" fill="#83613e"/><path d="M25 94 176 43 294 85 144 151Z" fill="'+paint(id+"gold")+'" stroke="#a78350"/><path d="M47 94 176 54 273 87 144 138Z" fill="#fbedd6" stroke="#a9804b"/><path d="M69 91 175 60 246 88 144 129Z" fill="#ead2ad"/><path d="M25 100 9 106 9 123 35 133M291 90 310 84 310 100 291 110" fill="none" stroke="#997443" stroke-width="6" stroke-linejoin="round"/>');
+ const mini=kind==="mini",gift=kind==="gift",long=kind==="long";
+ return frame('<g '+(mini?'transform="translate(54 39) scale(.66)"':long?'transform="translate(0 23) scale(1 .84)"':'')+'><path d="M29 93 168 38 291 78 150 145Z" fill="'+paint(id+"paper")+'" stroke="#a77c4d"/><path d="M29 93V142L150 188V145Z" fill="'+(gift?"#a77452":"#c1a078")+'"/><path d="M150 145 291 78V126L150 188Z" fill="'+(gift?"#79503b":"#94724c")+'"/><path d="M29 91 168 34 291 74 150 139Z" fill="'+(gift?paint(id+"dark"):paint(id+"paper"))+'" stroke="#a07a50"/><path d="M43 91 168 42 277 76 150 131Z" fill="none" stroke="#d6b77f" stroke-width="1.4"/>'+(gift?'<path d="M101 62 126 52 250 92 228 102Z" fill="'+paint(id+"gold")+'"/><path d="M81 112 223 52 246 59 103 120Z" fill="'+paint(id+"gold")+'"/><path d="M153 83Q108 32 132 38Q153 41 160 81Q196 38 216 57Q226 73 166 85" fill="none" stroke="#e0bd79" stroke-width="8" stroke-linecap="round"/>':'')+'<g transform="translate(160 87) rotate(-13)"><ellipse rx="42" ry="19" fill="'+(gift?"#e4c58c":"#6c4c31")+'" stroke="#b68e51"/><text text-anchor="middle" y="4" font-size="13" font-family="Georgia" fill="'+(gift?"#553522":"#f6dbab")+'">'+(mini?"PETIT":gift?"GIFT":"GATHER")+'</text></g></g>');
 }
 const portionCount=10;
 function sweetColors(kind){
@@ -313,7 +344,7 @@ if(step===9){
  main.innerHTML='<div class="center"><div class="eyebrow">ضيافة على قد المناسبة</div><h1>هيك بتكفي كل ضيوفك</h1><p class="hint">'+esc(eventLabel())+'</p></div><div class="event-hero">'+boxArt("box")+'</div><div class="summary"><div class="summaryrow"><span>عدد الضيوف</span><b>'+guests+'</b></div><div class="summaryrow"><span>الكمية المقترحة</span><b>'+fmt(estimate)+' كيلو</b></div><div class="summaryrow"><span>سعر تقريبي</span><b>حوالي '+money(Math.round(estimate*avg))+'</b></div></div><div class="notice">اقتراح تجريبي على أساس 150 غرام لكل ضيف، قابل للتعديل حسب ذوقك. السعر النهائي حسب الأصناف المختارة.</div>';
  footer.innerHTML=primary("اعتمد التشكيلة المقترحة","event-preset")+'<button class="secondary checkout-secondary" data-act="event-custom">بدي أشكّل الضيافة بنفسي</button>';
 }
-if(step===1){main.innerHTML='<div class="center"><div class="eyebrow">اختر البوكس</div><h1>ضيافتك على ذوقك</h1><p class="hint">'+esc(b.name)+' · اسحب يميناً أو يساراً</p></div><div class="stage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+boxArt(data.boxes[wrap(box-1,data.boxes.length)].kind)+'</div><div class="hero">'+boxArt(bx.kind)+'</div><div class="neighbor next">'+boxArt(data.boxes[wrap(box+1,data.boxes.length)].kind)+'</div></div></div>'+nav(box,data.boxes.length)+'<div class="center"><h2>'+esc(bx.name)+'</h2><p class="hint">يكفي تقريباً '+fmt(bx.capacity)+' كيلو حلويات</p></div>';footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
+if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختر البوكس</div><h1 id="package-name">'+esc(bx.name)+'</h1><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div></div>'+nav(box,data.boxes.length);footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
 if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+categoryBar()+nav(selected(),catalog().length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+((kg()+.5>capacity()||(amounts[sweet]||0)>=5)?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
 
 if(step===3){
@@ -404,14 +435,15 @@ function mountSpring(){
   layer=stage.querySelector(".carousel");layer.className="spring-carousel";
  }
  layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[sweetIndices()[i]]||0))+'</div>').join("");
- scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step,circular:step===2&&items.length>1};
+ scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step,circular:(step===1||step===2)&&items.length>1,wheel:step===1&&items.length>1,shown:k};
  paintSpring();
 }
 function paintSpring(){
  const s=scene;if(!s)return;
  const w=s.stage.clientWidth,h=s.stage.clientHeight,side=clamp(w*.46,82,255);
  if(!w||!h)return;
- s.stage.style.setProperty("--art-width",Math.max(64,Math.min(w*(s.circular?.77:.86),h*(s.circular?1.45:1.45),s.step===2?330:365))+"px");
+ s.stage.style.setProperty("--art-width",Math.max(64,s.wheel?Math.min(w*.52,h*.70,230):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365))+"px");
+ if(s.wheel){const index=wrap(Math.round(s.k)%s.items.length,s.items.length);if(index!==s.shown){s.shown=index;const x=s.items[index];document.getElementById("package-name").textContent=x.name;document.getElementById("package-desc").textContent=x.desc;document.getElementById("package-capacity").textContent=fmt(x.capacity)+" كيلو";main.querySelectorAll(".dots span").forEach((dot,i)=>dot.classList.toggle("on",i===index))}}
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){
   const lo=Math.floor(s.k),mix=s.k-lo,ease=mix*mix*(3-2*mix);
@@ -431,6 +463,13 @@ function paintSpring(){
    const tappable=i===branch&&data.branches[i].open&&Math.abs(dif)<.35;
    el.classList.toggle("is-selected",tappable);el.tabIndex=tappable?0:-1;el.setAttribute("role","button");el.setAttribute("aria-label",data.branches[i].name);el.setAttribute("aria-disabled",String(!tappable));if(tappable)el.dataset.act="continue";else delete el.dataset.act;
    el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+clamp(s.velocity*10,-5,5)+"deg) scale("+scale+")";
+  }else if(s.wheel){
+   // Front-facing, flat rotating wheel. The products are its only visible teeth.
+   const angle=dif*2*Math.PI/s.items.length,front=Math.cos(angle),sine=Math.sin(angle);
+   const radius=Math.min(w*.53,h*.64),x=radius*sine,y=-h*.23+radius*(1-front);
+   const fade=clamp((front+.10)/.88,0,1),scale=.70+.30*Math.max(0,front);
+   el.style.visibility=fade<.015?"hidden":"visible";el.style.opacity=fade.toFixed(3);el.style.zIndex=String(Math.round(100+front*100));
+   el.style.transform="translate(-50%,-50%) translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px) rotate("+(Math.atan2(sine,front)*180/Math.PI*.82).toFixed(1)+"deg) scale("+scale.toFixed(3)+")";
   }else if(s.circular){
    // A true horizontal ring viewed from above: the front plate advances
    // around an ellipse, while rear plates recede in perspective.
@@ -526,7 +565,7 @@ main.addEventListener("pointermove",e=>{
  const deadzone=s.vertical?18:8;
  if(!p.axis){if(Math.hypot(dx,dy)<deadzone)return;if(Math.abs(cross)>Math.abs(primary)){p.rejected=true;return}p.axis=true}
  const drag=s.vertical?Math.sign(primary)*Math.max(0,Math.abs(primary)-deadzone):primary;
- const raw=p.k-drag/(s.vertical?Math.max(220,s.stage.clientHeight*.62):160);
+ const raw=p.k-drag/(s.vertical?Math.max(220,s.stage.clientHeight*.62):s.wheel?Math.max(100,s.stage.clientWidth*.31):160);
  const max=s.items.length-1,elastic=raw<0?raw*.32:raw>max?max+(raw-max)*.32:raw;
  const val=s.circular?raw:clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
  s.velocity=s.velocity*.5+(val-s.k)/dt*.5;s.k=val;p.last=now;paintSpring();
@@ -540,14 +579,14 @@ function release(e,canceled=false){
   suppress=Date.now()+300;
   const delta=s.vertical?e.clientY-p.y:e.clientX-p.x;
   const momentum=performance.now()-p.last>110?0:s.velocity;
-  let dest=Math.round(s.k+momentum*(s.vertical?3:7));
+  let dest=Math.round(s.k+momentum*(s.vertical?3:s.wheel?4:7));
   if(s.vertical){
    // Short drags settle back; a deliberate gesture advances only one branch.
    if(Math.abs(delta)<65)dest=p.from;
    else if(Math.abs(delta)>=85&&dest===p.from)dest=p.from+(delta<0?1:-1);
    dest=clamp(dest,p.from-1,p.from+1);
   }else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
-  s.target=s.circular?clamp(dest,p.from-2,p.from+2):clamp(dest,0,s.items.length-1);
+  s.target=s.circular?clamp(dest,p.from-(s.wheel?1:2),p.from+(s.wheel?1:2)):clamp(dest,0,s.items.length-1);
  }else{s.target=p.from;s.velocity=0}
  if(reduceMotion.matches){commitSelection(s.target);return}
  runSpring();

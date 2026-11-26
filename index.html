@@ -354,6 +354,13 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .dessertstage{overflow:visible;z-index:1}
 .dessertstage .spring-carousel{overflow:visible;transform-origin:50% 55%}
 .sweet-controls{position:relative;z-index:2}
+
+.weight-entry{display:flex;align-items:center;justify-content:center;gap:3px;min-width:92px;width:110px;border:1px solid #d9c5a8;border-radius:9px;background:#fff8ea88;padding:4px 7px;color:#5d412e;font-size:13px;font-weight:bold;direction:ltr;cursor:text}
+.weight-entry input{width:100%;min-width:0;outline:none;background:transparent;border:0;border-bottom:1px dashed #ba9663;padding:3px 0;color:inherit;font:inherit;font-size:16px;text-align:center;direction:ltr}
+.weight-entry:focus-within{border-color:#a47b45;box-shadow:0 0 0 2px #be8c4825}
+.weight-entry span{flex:none}
+.sweet-total.full{color:#4e703a;font-weight:700}
+@media(max-height:480px){.weight-entry{padding:2px 6px}.weight-entry input{padding:1px 0}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><header class="mascot-header" id="mascot-header" data-mood="happy"><button class="mascot-button" id="mascot-button" type="button" aria-label="احكي مع لوزة"><svg viewBox="0 0 94 88" aria-hidden="true"><g stroke="#70482f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 58Q12 58 10 46M67 57Q81 55 83 42M10 46l-4-5m4 5 4-7m69 3 4-5m-4 5-4-6M30 69l-5 10h-8m43-10 5 10h8" fill="none"/><path d="M45 9Q49 7 53 11L80 36Q84 40 80 46L53 73Q49 77 44 74L14 47Q10 43 14 38Z" fill="#c48a46"/><path d="M45 4Q49 2 53 6L80 32Q84 36 80 42L52 67Q48 71 43 67L14 40Q10 36 14 32Z" fill="#efc67c"/><path d="M19 42L44 65 49 68 76 44M20 48l24 22m29-23L51 70" fill="none" stroke="#aa733e" stroke-width="1.2"/><path d="M23 30L44 11m15 3 13 14M27 48l10 10" fill="none" stroke="#fff0c6" stroke-width="2"/><path d="M40 13q8-8 16-1-1 7-8 9-6-1-8-8Z" fill="#849348"/></g><g fill="#70482f" class="mascot-eyes"><ellipse cx="34" cy="34" rx="3.5" ry="5"/><ellipse cx="60" cy="34" rx="3.5" ry="5"/></g><g fill="#d78f72" opacity=".75"><ellipse cx="27" cy="43" rx="5" ry="2.5"/><ellipse cx="67" cy="43" rx="5" ry="2.5"/></g><path class="mascot-mouth" d="M40 44Q47 51 54 44" fill="none" stroke="#70482f" stroke-width="2.6" stroke-linecap="round"/><path class="mascot-spark" d="M83 11v10m-5-5h10M8 15v7m-3.5-3.5h7" fill="none" stroke="#b68b43" stroke-width="2" stroke-linecap="round"/></svg></button><div class="mascot-bubble"><span class="mascot-name">لوزة</span><span id="mascot-speech" role="status" aria-live="polite">يا هلا بالحلوين!</span></div></header><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const dahabBranches=[{id:"nasr",name:"الفرع الرئيسي – النصر",note:"محطة بهلول",open:true},{id:"samer",name:"فرع السامر",note:"غزة – السامر",open:true},{id:"deir",name:"فرع دير البلح",note:"جنوب مفترق البركة",open:true},{id:"nuseirat",name:"فرع النصيرات",note:"مقابل بنك فلسطين",open:true},{id:"khanyounis",name:"فرع خان يونس",note:"البلد – شارع شعت",open:true}];
@@ -398,7 +405,7 @@ const demoNames=[["لمسة ذهب","كنافة ذهبية بالجبنة وال
 function fictionalize(d){return {...d,branches:dahabBranches,boxes:enrichPackages(d.boxes),sweets:enrichSweets(d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc})))}}
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
+const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), roundKg=n=>Math.round((n+Number.EPSILON)*100)/100, kg=()=>roundKg(Object.values(amounts).reduce((s,v)=>s+v,0)), total=()=>roundKg(data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0));
 const money=n=>fmt(n)+" ₪", capacity=()=>mode==="event"?Math.max(eventWeight()+3,5):data.boxes[box].capacity;
 
 /* Lightweight illustrated showroom assets. Every SVG has its own paint IDs. */
@@ -432,9 +439,14 @@ function boxArt(kind){
 }
 const portionCount=20;
 const quantityStep=.25;
+const remainingKg=()=>Math.max(0,roundKg(capacity()-kg()));
+const boxFull=()=>remainingKg()===0;
+function parseWeight(value){const s=String(value).trim().replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632)).replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776)).replace(/[٫,]/g,".");return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(s)?roundKg(Number(s)):null}
+function setSweetWeight(value){const n=parseWeight(value);if(n===null||!Number.isFinite(n))return false;const max=roundKg((amounts[sweet]||0)+remainingKg());amounts[sweet]=Math.min(n,max);if(!amounts[sweet])delete amounts[sweet];return true}
+function sweetTotalLabel(){return boxFull()?"البوكس امتلأ ✓ · "+fmt(kg())+" كيلو":fmt(kg())+" / "+fmt(mode==="event"?eventWeight():capacity())+" كيلو "+(mode==="event"?"مقترح":"")}
 const servingCapacity=5;
 const plateNumber=q=>Math.floor(Math.max(0,q)/servingCapacity);
-const plateUsed=q=>Math.max(0,q)%servingCapacity;
+const plateUsed=q=>roundKg(Math.max(0,q)%servingCapacity);
 function servingArt(kind,q){return dessert(kind,plateUsed(q))}
 const roundKinds=["kunafa","arabic","coarse","creamkunafa"];
 const specialColors={coarse:["#d88e25","#f6bf55","#a95520","#fff0cf","#824414"],creamkunafa:["#e8af53","#ffe3a0","#b17b3d","#fff6df","#a06727"],walnut:["#b97b43","#f4cd86","#80502d","#d8ab71","#653b22"],almond:["#c58c3f","#f2d09a","#99632d","#f5dfb1","#805029"],nest:["#c9a151","#f9dc8e","#987039","#c2c772","#745128"],roll:["#cfa04e","#f6df9b","#996637","#b3be63","#744423"],qatayef:["#e1ac66","#ffe0a7","#ae7441","#fff3da","#976032"],datecookie:["#c59761","#f5d8a3","#95683d","#79502e","#684122"],pistachiocookie:["#ceb174","#fae8ba","#a78750","#91a04b","#796536"],ghraybeh:["#e0cda1","#fff6d8","#b7a17a","#f8ebce","#987e51"],coconut:["#d2b583","#fff6df","#aa8251","#fff8e9","#917048"],chocolate:["#65402d","#af7952","#44291d","#a37b4e","#332119"]};
@@ -511,7 +523,9 @@ function mascotLine(action="step",delta=0,index=null){
  const b=data.branches[step===0&&index!==null?index:branch],bx=data.boxes[step===1&&index!==null?index:box],s=data.sweets[step===2&&index!==null?sweetIndices()[index]:sweet];
  const pick=arr=>arr.find(x=>!mascotUsed.has(x.trim()))||"";
  if(action==="branch-confirmed")return [pick(["تمام، من "+b.name+"! الحلا إلك ولا لمناسبة؟","اختيار موفّق! "+b.name+" رح يجهّزلك طلبك.","يلا من "+b.name+" نختار الحلا!","ثبتنا "+b.name+"، شو المناسبة؟","أحلى ضيافة من "+b.name+"!","صار فرعنا "+b.name+"، جاهز نكمّل؟"]),"excited"];
- if(action==="plus"&&delta>0)return [kg()>=capacity()?"هيك البوكس صار كامل!":pick(["يا سلام عالذوق!","ربع كيلو من السعادة!","هاي اللقمة إلها ناسها!","شكله بوكس بيفتح النفس!","هيني ضفتلك منها!","كل لقمة أحلى من التانية!","اختيار بيفرّح القلب!","حلا فوق حلا!",s.name+" صارت "+fmt(amounts[sweet]||0)+" كيلو بالبوكس!","صار عنا "+fmt(kg())+" كيلو من الحلا!"]),"excited"];
+ if(delta>0&&boxFull()&&(action==="plus"||action.startsWith("set-weight:")))return [pick(["هيك البوكس صار كامل!","تمام! وصلنا للوزن المطلوب.","بوكس مليان حلا، صحتين!"]),"excited"];
+ if(action.startsWith("set-weight:")&&delta!==0)return [pick(["تمام، "+s.name+" "+fmt(amounts[sweet]||0)+" كيلو!","عدّلنا الوزن، صار البوكس "+fmt(kg())+" كيلو.","تشكيلتك صارت "+fmt(kg())+" كيلو!"]),"happy"];
+ if(action==="plus"&&delta>0)return [pick(["يا سلام عالذوق!","ربع كيلو من السعادة!","هاي اللقمة إلها ناسها!","شكله بوكس بيفتح النفس!","هيني ضفتلك منها!","كل لقمة أحلى من التانية!","اختيار بيفرّح القلب!","حلا فوق حلا!",s.name+" صارت "+fmt(amounts[sweet]||0)+" كيلو بالبوكس!","صار عنا "+fmt(kg())+" كيلو من الحلا!"]),"excited"];
  if((action==="minus"||action==="remove")&&delta<0)return [pick(["ولا يهمك، التشكيلة على ذوقك!","هيك أزبط؟","منرجّعها عالصحن.","خد راحتك بالتعديل.","خلّينا نوازن التشكيلة!","صار وزن البوكس "+fmt(kg())+" كيلو."]),"wink"];
  if(action.startsWith("cat:"))return [pick(["يلا نشوف "+(categories.find(x=>x[0]===category)?.[1]||"الحلويات")+"!","خلّينا نغيّر النكهة!","في اختيارات حلوة هون كمان!"]),"happy"];
  if(action.startsWith("resume:"))return ["أهلين من جديد! نكمّل حلاك؟","excited"];
@@ -646,7 +660,7 @@ if(step===1){main.innerHTML='<div class="center package-heading"><div class="eye
 if(step===2){
  let q=amounts[sweet]||0;
  let pieces=trayPieces();
- main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة ربع كيلو" '+(kg()+quantityStep>capacity()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
+ main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><label class="weight-entry"><input id="sweet-weight" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="الكمية بالكيلو" value="'+fmt(q)+'"><span>كيلو</span></label><button data-act="plus" aria-label="إضافة ربع كيلو" '+(boxFull()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint '+(boxFull()?"full":"")+'" role="status" aria-live="polite">'+sweetTotalLabel()+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
  footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)
 }
 
@@ -725,7 +739,7 @@ function restoreJourney(snapshot){
   fulfillment=p.fulfillment==="delivery"?"delivery":"pickup";slot=typeof p.slot==="string"?p.slot:"20 دقيقة";
   zone=["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].includes(p.zone)?p.zone:"المنطقة الأولى";
   payment=p.payment==="cash"?"cash":"wallet";proof=p.proof===true;
-  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%quantityStep===0&&kg()+v<=capacity())amounts[i]=v;
+  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&Math.abs(v-roundKg(v))<1e-8&&roundKg(kg()+v)<=capacity())amounts[i]=v;
   order=p.order&&typeof p.order.id==="string"&&Array.isArray(p.order.items)?p.order:null;
   orderState=Number.isInteger(p.orderState)?Math.max(0,Math.min(4,p.orderState)):0;
   return true;
@@ -755,8 +769,9 @@ else if(step===2&&a.startsWith("jump-sweet:")){const i=Number(a.slice(11));if(Nu
 else if(step===2&&a.startsWith("cat:")){const next=a.slice(4);if(categories.some(x=>x[0]===next)){category=next;if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0}}
 else if(a==="custom"&&step===1)step=2;
 else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()/quantityStep);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+quantityStep}step=2}
-else if(a==="plus"&&step===2&&kg()+quantityStep<=capacity())amounts[sweet]=(amounts[sweet]||0)+quantityStep;
-else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-quantityStep);
+else if(a==="plus"&&step===2&&!boxFull())setSweetWeight(roundKg((amounts[sweet]||0)+Math.min(quantityStep,remainingKg())));
+else if(step===2&&a.startsWith("set-weight:"))setSweetWeight(a.slice(11));
+else if(a==="minus"&&step===2)setSweetWeight(Math.max(0,roundKg((amounts[sweet]||0)-quantityStep)));
 else if(a==="remove"&&step===2)delete amounts[sweet];
 else if(a==="review"&&step===2&&kg()>0)step=3;
 
@@ -776,7 +791,7 @@ else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();r
 else if(a==="restart"){selectionId=null;step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
 else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
 persist();if(render)draw(!((a==="continue"&&step===7)||(a==="event"&&step===8)))}
-document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
+document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches("input,textarea"))return;if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)");
 let scene=null, pointer=null, raf=0, lastTime=0, suppress=0;
@@ -953,11 +968,11 @@ function animatePlateExchange(kind,oldQty,newQty){
 function refreshSweetQuantity(){
  const q=amounts[sweet]||0,goal=mode==="event"?eventWeight():capacity(),tray=main.querySelector(".boxtray");
  const scroll=tray.scrollLeft;
- main.querySelector(".weight output").textContent=fmt(q)+" كيلو";
+ main.querySelector("#sweet-weight").value=fmt(q);
  main.querySelector('[data-act="minus"]').disabled=q===0;
  main.querySelector('[data-act="remove"]').disabled=q===0;
- main.querySelector('[data-act="plus"]').disabled=kg()+quantityStep>capacity();
- main.querySelector(".sweet-total").textContent=fmt(kg())+" / "+fmt(goal)+" كيلو "+(mode==="event"?"مقترح":"");
+ main.querySelector('[data-act="plus"]').disabled=boxFull();
+ const status=main.querySelector(".sweet-total");status.textContent=sweetTotalLabel();status.classList.toggle("full",boxFull());
  main.querySelector(".progress i").style.width=Math.min(100,kg()/goal*100)+"%";
  tray.innerHTML=trayPieces()||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>';tray.scrollLeft=scroll;
  const review=footer.querySelector('[data-act="review"]');review.disabled=kg()===0;review.querySelector(".orderbtn span:last-child").textContent=money(total());
@@ -975,7 +990,7 @@ function action(a){
   const i=Number(a.slice(11)),index=sweetIndices().indexOf(i);
   if(index>=0&&(amounts[i]||0)>0){const n=scene.items.length;const target=index+Math.round((scene.k-index)/n)*n;scene.target=target;scene.velocity=0;mascotSelection(target);if(reduceMotion.matches)commitSelection(target);else runSpring();return}
  }
- const quantityAction=step===2&&["plus","minus","remove"].includes(a)&&!!scene;
+ const quantityAction=step===2&&(["plus","minus","remove"].includes(a)||a.startsWith("set-weight:"))&&!!scene;
  if(quantityAction){
   // Quantity controls belong to the displayed name, never to an unfinished swipe target.
   if(raf)cancelAnimationFrame(raf);raf=0;lastTime=0;
@@ -990,19 +1005,22 @@ function action(a){
   refreshSweetQuantity();
   // Keep the actual carousel DOM, angle and all neighboring plates intact.
   const active=scene.els[selected()];if(active)active.innerHTML=servingArt(kind,amounts[sweet]||0);
-  if(a==="plus"&&kg()>old)expandSweetWheel(scene);
+  if((a==="plus"||a.startsWith("set-weight:"))&&kg()>old)expandSweetWheel(scene);
  }
- const exchanged=step===2&&before===2&&["plus","minus","remove"].includes(a)?animatePlateExchange(kind,oldQty,amounts[sweet]||0):false;
- if(step===2&&before===2&&kg()>old&&a==="plus"){
+ const exchanged=step===2&&before===2&&(["plus","minus","remove"].includes(a)||a.startsWith("set-weight:"))?animatePlateExchange(kind,oldQty,amounts[sweet]||0):false;
+ if(step===2&&before===2&&kg()>old&&(a==="plus"||a.startsWith("set-weight:"))){
   const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']");
   if(target){const tray=main.querySelector(".boxtray"),r=target.getBoundingClientRect(),t=tray.getBoundingClientRect();if(r.left<t.left||r.right>t.right)target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
  }
- if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true,exchanged?160:0);
+ if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"||a.startsWith("set-weight:")))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true,exchanged?160:0);
  mascotSpeak(before===0&&step===7&&a==="continue"?"branch-confirmed":a,true,kg()-old);
  if(before!==step&&!reduceMotion.matches){
   main.animate([{opacity:0,transform:"translateY("+(a==="back"?-14:14)+"px)"},{opacity:1,transform:"translateY(0)"}],{duration:310,easing:"cubic-bezier(.2,.8,.2,1)"});
  }
 }
+main.addEventListener("focusin",e=>{if(e.target.id==="sweet-weight")e.target.select()});
+main.addEventListener("change",e=>{if(e.target.id!=="sweet-weight"||step!==2)return;const value=parseWeight(e.target.value);if(value===null||!Number.isFinite(value)){e.target.value=fmt(amounts[sweet]||0);return}action("set-weight:"+value);if(e.target.isConnected)e.target.value=fmt(amounts[sweet]||0)});
+main.addEventListener("keydown",e=>{if(e.target.id==="sweet-weight"&&e.key==="Enter"){e.preventDefault();e.target.blur()}});
 main.addEventListener("pointerdown",e=>{
  const s=scene;if(!s||pointer||e.button!==0||e.isPrimary===false||e.target.closest("button,a,input"))return;
  const surface=e.target.closest("[data-swipe]");if(!surface)return;
@@ -1061,7 +1079,7 @@ main.addEventListener("lostpointercapture",e=>release(e,true));
 main.addEventListener("click",e=>{if(Date.now()<suppress){e.preventDefault();e.stopPropagation()}},true);
 window.addEventListener("resize",()=>paintSpring(),{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>paintSpring(),{passive:true});
-function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:dahab:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%quantityStep===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
+function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:dahab:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&Math.abs(v-roundKg(v))<1e-8&&roundKg(kg()+v)<=capacity())amounts[i]=v}}}catch{}}
 const loading=document.getElementById("loading-screen"),loadingArt=document.getElementById("loading-art");
 loadingArt.innerHTML=boxArt("gift");
 const bootStart=performance.now();let bootFinished=false;

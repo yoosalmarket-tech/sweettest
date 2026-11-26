@@ -277,7 +277,7 @@ body{font-family:"Thmanyah UI","IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
  main[data-step="2"]>.boxtray{grid-column:2;grid-row:5;height:clamp(49px,16dvh,83px)}
  main[data-step="2"]>.saved{display:none}
 }
-</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
+.dessertstage .spring-item.sweet-neighbor{pointer-events:auto;cursor:pointer}.dessertstage .spring-item.sweet-neighbor:focus-visible{outline:2px solid #a47b45;outline-offset:4px;border-radius:50%}</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 const packageExtras=[
@@ -335,7 +335,8 @@ function boxArt(kind){
  const mini=kind==="mini",gift=kind==="gift",long=kind==="long";
  return frame('<g '+(mini?'transform="translate(54 39) scale(.66)"':long?'transform="translate(0 23) scale(1 .84)"':'')+'><path d="M29 93 168 38 291 78 150 145Z" fill="'+paint(id+"paper")+'" stroke="#a77c4d"/><path d="M29 93V142L150 188V145Z" fill="'+(gift?"#a77452":"#c1a078")+'"/><path d="M150 145 291 78V126L150 188Z" fill="'+(gift?"#79503b":"#94724c")+'"/><path d="M29 91 168 34 291 74 150 139Z" fill="'+(gift?paint(id+"dark"):paint(id+"paper"))+'" stroke="#a07a50"/><path d="M43 91 168 42 277 76 150 131Z" fill="none" stroke="#d6b77f" stroke-width="1.4"/>'+(gift?'<path d="M101 62 126 52 250 92 228 102Z" fill="'+paint(id+"gold")+'"/><path d="M81 112 223 52 246 59 103 120Z" fill="'+paint(id+"gold")+'"/><path d="M153 83Q108 32 132 38Q153 41 160 81Q196 38 216 57Q226 73 166 85" fill="none" stroke="#e0bd79" stroke-width="8" stroke-linecap="round"/>':'')+'<g transform="translate(160 87) rotate(-13)"><ellipse rx="42" ry="19" fill="'+(gift?"#e4c58c":"#6c4c31")+'" stroke="#b68e51"/><text text-anchor="middle" y="4" font-size="13" font-family="Georgia" fill="'+(gift?"#553522":"#f6dbab")+'">'+(mini?"PETIT":gift?"GIFT":"GATHER")+'</text></g></g>');
 }
-const portionCount=10;
+const portionCount=20;
+const quantityStep=.25;
 const servingCapacity=5;
 const plateNumber=q=>Math.floor(Math.max(0,q)/servingCapacity);
 const plateUsed=q=>Math.max(0,q)%servingCapacity;
@@ -343,7 +344,7 @@ function servingArt(kind,q){return dessert(kind,plateUsed(q))}
 function sweetColors(kind){
  return kind==="kunafa"?{top:"#e59a24",light:"#ffd474",side:"#ad611f",cut:"#fff1bf",dark:"#7e4216"}:kind==="arabic"?{top:"#a8662d",light:"#edb66b",side:"#753d22",cut:"#c38a48",dark:"#59301d"}:kind==="baklava"?{top:"#d6a343",light:"#f9dc96",side:"#8b582a",cut:"#eed3a1",dark:"#744625"}:{top:"#cb8a36",light:"#f3c66e",side:"#a4612b",cut:"#efd09a",dark:"#865020"}
 }
-function portionAngles(i){let a=Math.PI/2-Math.PI/10+i*2*Math.PI/portionCount;return [a,a+2*Math.PI/portionCount]}
+function portionAngles(i){let a=Math.PI/2-Math.PI/portionCount+i*2*Math.PI/portionCount;return [a,a+2*Math.PI/portionCount]}
 function ellipsePoint(a){return [160+117*Math.cos(a),90+44*Math.sin(a)]}
 function coord(p){return p.map(n2).join(" ")}
 function down(p){return [p[0],p[1]+19]}
@@ -360,14 +361,14 @@ function pieceArt(kind){
  return '<svg viewBox="0 0 100 76" aria-hidden="true">'+foodDefs(id,c)+'<ellipse cx="51" cy="64" rx="43" ry="9" fill="'+paint(id+"shadow")+'"/><path d="'+left+'" fill="'+paint(id+"side")+'" stroke="'+c.dark+'" stroke-width=".6"/><path d="'+front+'" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".6"/>'+lines+'<path d="'+top+'" fill="'+paint(id+"top")+'" stroke="'+c.side+'" stroke-width=".7"/>'+garnish+'</svg>'
 }
 function dessert(kind,removedKg=0){
- const id=uid(),c=sweetColors(kind),missing=Math.min(portionCount,Math.max(0,Math.round(removedKg*2)));
- const round=kind==="kunafa"||kind==="arabic",order=round?[0,1,9,2,8,3,7,4,6,5]:[9,8,7,6,5,4,3,2,1,0],gone=new Set(order.slice(0,missing));
+ const id=uid(),c=sweetColors(kind),missing=Math.min(portionCount,Math.max(0,Math.round(removedKg/quantityStep)));
+ const round=kind==="kunafa"||kind==="arabic",order=round?Array.from({length:portionCount},(_,i)=>i%2===0?(portionCount-Math.floor(i/2))%portionCount:Math.ceil(i/2)):Array.from({length:portionCount},(_,i)=>portionCount-1-i),gone=new Set(order.slice(0,missing));
  const active=Array.from({length:portionCount},(_,i)=>i).filter(i=>!gone.has(i));
  let food="";
  if(round){
  const sides=active.map(i=>{let [a,b]=portionAngles(i),p=ellipsePoint(a),q=ellipsePoint(b),mid=(a+b)/2,result="";
  if(Math.sin(mid)>0)result+='<path d="M'+coord(p)+' A117 44 0 0 1 '+coord(q)+' L'+coord(down(q))+' A117 44 0 0 0 '+coord(down(p))+' Z" fill="'+paint(id+"side")+'" stroke="'+c.side+'" stroke-width=".6"/>';
- for(const [idx,pt] of [[(i+9)%10,p],[(i+1)%10,q]])if(gone.has(idx)){result+='<path d="M160 90 L'+coord(pt)+' L'+coord(down(pt))+' L160 109 Z" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".7"/><path d="M160 96 L'+coord([pt[0],pt[1]+6])+'" stroke="#fff1c7" stroke-width="1.4" opacity=".9"/>'}
+ for(const [idx,pt] of [[(i+portionCount-1)%portionCount,p],[(i+1)%portionCount,q]])if(gone.has(idx)){result+='<path d="M160 90 L'+coord(pt)+' L'+coord(down(pt))+' L160 109 Z" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".7"/><path d="M160 96 L'+coord([pt[0],pt[1]+6])+'" stroke="#fff1c7" stroke-width="1.4" opacity=".9"/>'}
  return result}).join("");
  const clip=id+"food";
  const tops=active.map(i=>'<path d="'+sliceTop(i)+'" fill="'+paint(id+"top")+'" stroke="'+c.top+'" stroke-width=".6"/>').join("");
@@ -375,9 +376,9 @@ function dessert(kind,removedKg=0){
  let garnish=Array.from({length:52},(_,i)=>{let a=i*2.39996,r=(i%7<3?.17:.76)+(i%3)*.035,x=160+Math.cos(a)*104*r,y=90+Math.sin(a)*36*r;return '<ellipse cx="'+n2(x)+'" cy="'+n2(y)+'" rx="'+(1.2+i%3*.7)+'" ry="1.15" fill="'+(kind==="arabic"?(i%2?"#e0b875":"#78502b"):(i%3?"#899544":"#4f602f"))+'" transform="rotate('+i*29+' '+n2(x)+' '+n2(y)+')"/>'}).join("");
  food=sides+tops+'<clipPath id="'+clip+'">'+active.map(i=>'<path d="'+sliceTop(i)+'"/>').join("")+'</clipPath><g clip-path="url(#'+clip+')">'+texture+garnish+'</g>';
  }else{
- const cells=active.map(i=>{let row=Math.floor(i/5),col=i%5,x=50+col*38+row*28,y=67+row*28-col*2;
- const top="M"+x+" "+y+"l34 -2 24 22 -34 3Z",front="M"+(x+24)+" "+(y+23)+"l34 -3v15l-34 4Z",left="M"+x+" "+y+"l24 23v16l-24 -23Z";
- let layers=Array.from({length:4},(_,j)=>'<path d="M'+(x+25)+' '+(y+25+j*3)+'l32 -3" stroke="'+(j%2?c.side:c.light)+'" stroke-width=".9" opacity=".8"/>').join("");
+ const cells=active.map(i=>{let row=Math.floor(i/5),col=i%5,x=48+col*38+row*10,y=56+row*19-col*2;
+ const top="M"+x+" "+y+"l30 -2 19 16 -30 3Z",front="M"+(x+19)+" "+(y+17)+"l30 -3v13l-30 3Z",left="M"+x+" "+y+"l19 17v13l-19 -17Z";
+ let layers=Array.from({length:4},(_,j)=>'<path d="M'+(x+20)+' '+(y+19+j*2.5)+'l28 -3" stroke="'+(j%2?c.side:c.light)+'" stroke-width=".9" opacity=".8"/>').join("");
  let garnish=kind==="baklava"?Array.from({length:10},(_,j)=>'<ellipse cx="'+(x+19+(j*5%15))+'" cy="'+(y+5+j%5*2)+'" rx="1.4" ry=".9" fill="'+(j%2?"#778740":"#52602e")+'"/>').join(""):'<ellipse cx="'+(x+28)+'" cy="'+(y+9)+'" rx="4" ry="2.6" fill="#efd6a0" stroke="#ae7d44" stroke-width=".6"/><path d="M'+(x+26)+' '+(y+8)+'l4 2" stroke="#fff0ce" stroke-width=".8"/>';
  return '<g><path d="'+left+'" fill="'+paint(id+"side")+'"/><path d="'+front+'" fill="'+paint(id+"cut")+'" stroke="'+c.side+'" stroke-width=".55"/>'+layers+'<path d="'+top+'" fill="'+paint(id+"top")+'" stroke="'+c.side+'" stroke-width=".75"/>'+garnish+'</g>'}).join("");
  food=cells;
@@ -412,7 +413,7 @@ if(step===1){main.innerHTML='<div class="center package-heading"><div class="eye
 if(step===2){
  let q=amounts[sweet]||0;
  let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<button type="button" class="piece '+(Number(i)===sweet?'active-piece':'')+'" data-index="'+i+'" data-act="jump-sweet:'+i+'" aria-label="عرض '+esc(data.sweets[i].name)+'" aria-pressed="'+(Number(i)===sweet)+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></button>').join("");
- main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
+ main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة ربع كيلو" '+(kg()+quantityStep>capacity()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
  footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)
 }
 
@@ -473,7 +474,7 @@ function restoreJourney(){
   fulfillment=p.fulfillment==="delivery"?"delivery":"pickup";slot=typeof p.slot==="string"?p.slot:"20 دقيقة";
   zone=["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].includes(p.zone)?p.zone:"المنطقة الأولى";
   payment=p.payment==="cash"?"cash":"wallet";proof=p.proof===true;
-  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%.5===0&&kg()+v<=capacity())amounts[i]=v;
+  amounts={};for(const [i,v] of Object.entries(p.amounts||{}))if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%quantityStep===0&&kg()+v<=capacity())amounts[i]=v;
   order=p.order&&typeof p.order.id==="string"&&Array.isArray(p.order.items)?p.order:null;
   orderState=Number.isInteger(p.orderState)?Math.max(0,Math.min(4,p.orderState)):0;
   return true;
@@ -497,13 +498,13 @@ else if(step===8&&a.startsWith("guests:"))guests=Number(a.slice(7));
 else if(step===8&&a.startsWith("eventday:"))eventDay=a.slice(9);
 else if(step===8&&a.startsWith("eventtime:"))eventTime=a.slice(10);
 else if(a==="event-plan"&&step===8)step=9;
-else if(step===9&&(a==="event-preset"||a==="event-custom")){amounts={};category="all";sweet=0;box=0;slot=eventDay+" "+eventTime;if(a==="event-preset"){for(let k=0;k<Math.round(eventWeight()*2);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+.5}}step=2}
+else if(step===9&&(a==="event-preset"||a==="event-custom")){amounts={};category="all";sweet=0;box=0;slot=eventDay+" "+eventTime;if(a==="event-preset"){for(let k=0;k<Math.round(eventWeight()/quantityStep);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+quantityStep}}step=2}
 else if(step===2&&a.startsWith("jump-sweet:")){const i=Number(a.slice(11));if(Number.isInteger(i)&&data.sweets[i]&&(amounts[i]||0)>0){if(!sweetIndices().includes(i))category=["kunafa","arabic"].includes(data.sweets[i].kind)?"kunafa":"oriental";sweet=i}}
 else if(step===2&&a.startsWith("cat:")){const next=a.slice(4);if(categories.some(x=>x[0]===next)){category=next;if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0}}
 else if(a==="custom"&&step===1)step=2;
-else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()*2);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+.5}step=2}
-else if(a==="plus"&&step===2&&kg()+.5<=capacity())amounts[sweet]=(amounts[sweet]||0)+.5;
-else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-.5);
+else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()/quantityStep);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+quantityStep}step=2}
+else if(a==="plus"&&step===2&&kg()+quantityStep<=capacity())amounts[sweet]=(amounts[sweet]||0)+quantityStep;
+else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-quantityStep);
 else if(a==="remove"&&step===2)delete amounts[sweet];
 else if(a==="review"&&step===2&&kg()>0)step=3;
 
@@ -605,6 +606,9 @@ function paintSpring(){
    el.style.visibility="visible";
    el.style.opacity=(1-depth*.62).toFixed(3);
    el.style.zIndex=String(Math.round(1000-depth*900));
+   const nearby=front<.85&&front>-.99;const tappable=s.step===2&&nearby;
+   el.classList.toggle("sweet-neighbor",tappable);el.tabIndex=tappable?0:-1;
+   if(tappable){el.dataset.act="select-plate:"+i;el.setAttribute("role","button");el.setAttribute("aria-label","عرض "+s.items[i].name)}else{delete el.dataset.act;el.removeAttribute("role");el.removeAttribute("aria-label")}
    el.style.transform="translate(-50%,-50%) translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+clamp(-s.velocity*14,-5,5)+"deg) rotateY("+(sine*11).toFixed(1)+"deg) rotateZ("+(-sine*5).toFixed(1)+"deg) scale("+scale.toFixed(3)+")";
   }else{
    let x=sign*Math.min(d,1.25)*side,y=Math.min(d,2.5)*18,z=-Math.min(d,3)*240;
@@ -686,6 +690,7 @@ function animatePlateExchange(kind,oldQty,newQty){
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
+ if(step===2&&a.startsWith("select-plate:")&&scene){const i=Number(a.slice(13)),n=scene.items.length;if(Number.isInteger(i)&&i>=0&&i<n){const target=i+Math.round((scene.k-i)/n)*n;scene.target=target;scene.velocity=0;if(reduceMotion.matches)commitSelection(target);else runSpring()}return}
  if(step===2&&a.startsWith("jump-sweet:")&&scene){
   const i=Number(a.slice(11)),index=sweetIndices().indexOf(i);
   if(index>=0&&(amounts[i]||0)>0){const n=scene.items.length;const target=index+Math.round((scene.k-index)/n)*n;scene.target=target;scene.velocity=0;if(reduceMotion.matches)commitSelection(target);else runSpring();return}
@@ -710,7 +715,7 @@ main.addEventListener("pointerdown",e=>{
  const surface=e.target.closest("[data-swipe]");if(!surface)return;
  touched=true;
  const heldAt=s.k,wasMoving=s.wheel&&Math.abs(s.target-heldAt)>.04;
- pointer={id:e.pointerId,capture:surface,x:e.clientX,y:e.clientY,k:heldAt,from:s.wheel?Math.round(heldAt):s.target,last:performance.now(),axis:false,rejected:false,wasMoving,branchTap:s.vertical&&!!e.target.closest(".spring-house.is-selected")};
+ pointer={id:e.pointerId,capture:surface,x:e.clientX,y:e.clientY,k:heldAt,from:s.wheel?Math.round(heldAt):s.target,last:performance.now(),axis:false,rejected:false,wasMoving,plateTap:s.step===2?e.target.closest(".sweet-neighbor")?.dataset.act:null,branchTap:s.vertical&&!!e.target.closest(".spring-house.is-selected")};
  if(s.wheel)s.target=Math.round(heldAt);
  surface.setPointerCapture?.(e.pointerId);s.stage.classList.add("dragging");
  s.velocity=0;runSpring();
@@ -738,6 +743,7 @@ function release(e,canceled=false){
  const p=pointer,s=scene;if(!p||!s||p.id!==e.pointerId)return;
  pointer=null;s.stage.classList.remove("dragging");
  if(p.capture?.hasPointerCapture?.(p.id))p.capture.releasePointerCapture(p.id);
+ if(p.plateTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<8){suppress=Date.now()+300;action(p.plateTap);return}
  if(p.branchTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<18&&data.branches[branch].open){suppress=Date.now()+300;action("continue");return}
  if(p.axis&&!canceled){
   suppress=Date.now()+300;
@@ -761,7 +767,7 @@ main.addEventListener("lostpointercapture",e=>release(e,true));
 main.addEventListener("click",e=>{if(Date.now()<suppress){e.preventDefault();e.stopPropagation()}},true);
 window.addEventListener("resize",()=>paintSpring(),{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>paintSpring(),{passive:true});
-function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%0.5===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
+function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%quantityStep===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
 if(!restoreJourney())restore();openRoute(location.pathname);
 const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=fictionalize(d);branch=box=sweet=0;amounts={};if(!restoreJourney())restore();openRoute(location.pathname)}}).catch(()=>{});
 </script></body></html>

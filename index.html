@@ -368,7 +368,7 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .roadstage .spring-house.branch-neighbor{pointer-events:auto;cursor:pointer}
 .roadstage .spring-house.branch-neighbor:focus-visible{outline:2px solid #a67a43;outline-offset:4px;border-radius:12px}
 .roadstage .spring-house.is-selected svg{filter:drop-shadow(0 8px 7px #79563835)}
-.roadstage .road{background:radial-gradient(ellipse at 50% 50%,#f5e8cf66,transparent 75%)}
+.roadstage .road{background:#eee3d0}
 
 /* Raise only the package copy, keeping the existing action row in exactly the same layout slot. */
 .package-info>h2,.package-info>.hint,.package-info>.package-capacity{transform:translateY(-12px)}
@@ -402,6 +402,9 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .roadstage .spring-house .last-branch-badge,.roadstage .house .last-branch-badge{position:absolute;top:0;left:50%;transform:translate(-50%,-115%);z-index:5;margin:0;padding:3px 10px;background:#f5df9d;border:1px solid #b58a45;color:#61421f;font-size:11px;box-shadow:0 2px 6px #49331f22;pointer-events:none}
 
 .branch-photo-wrap{position:relative;width:100%;aspect-ratio:2/1}.branch-photo-wrap .branch-photo{position:absolute;inset:0;opacity:0}.branch-photo-wrap.photo-loaded .branch-photo{opacity:1}.branch-photo-fallback{position:absolute;inset:0;display:grid;place-items:center}.branch-photo-fallback svg{height:100%;width:auto!important;max-width:100%}.branch-photo-wrap.photo-loaded .branch-photo-fallback{visibility:hidden}
+
+.dessertstage .spring-item>svg{transform:scaleY(1.28);transform-origin:50% 55%;overflow:visible}
+@media(max-height:620px){.dessertstage .spring-item>svg{transform:scaleY(1.20)}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><header class="mascot-header" id="mascot-header" data-mood="happy"><button class="mascot-button" id="mascot-button" type="button" aria-label="احكي مع لوزة"><svg viewBox="0 0 94 88" aria-hidden="true"><g stroke="#70482f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 58Q12 58 10 46M67 57Q81 55 83 42M10 46l-4-5m4 5 4-7m69 3 4-5m-4 5-4-6M30 69l-5 10h-8m43-10 5 10h8" fill="none"/><path d="M45 9Q49 7 53 11L80 36Q84 40 80 46L53 73Q49 77 44 74L14 47Q10 43 14 38Z" fill="#c48a46"/><path d="M45 4Q49 2 53 6L80 32Q84 36 80 42L52 67Q48 71 43 67L14 40Q10 36 14 32Z" fill="#efc67c"/><path d="M19 42L44 65 49 68 76 44M20 48l24 22m29-23L51 70" fill="none" stroke="#aa733e" stroke-width="1.2"/><path d="M23 30L44 11m15 3 13 14M27 48l10 10" fill="none" stroke="#fff0c6" stroke-width="2"/><path d="M40 13q8-8 16-1-1 7-8 9-6-1-8-8Z" fill="#849348"/></g><g fill="#70482f" class="mascot-eyes"><ellipse cx="34" cy="34" rx="3.5" ry="5"/><ellipse cx="60" cy="34" rx="3.5" ry="5"/></g><g fill="#d78f72" opacity=".75"><ellipse cx="27" cy="43" rx="5" ry="2.5"/><ellipse cx="67" cy="43" rx="5" ry="2.5"/></g><path class="mascot-mouth" d="M40 44Q47 51 54 44" fill="none" stroke="#70482f" stroke-width="2.6" stroke-linecap="round"/><path class="mascot-spark" d="M83 11v10m-5-5h10M8 15v7m-3.5-3.5h7" fill="none" stroke="#b68b43" stroke-width="2" stroke-linecap="round"/></svg></button><div class="mascot-bubble"><span class="mascot-name">لوزة</span><span id="mascot-speech" role="status" aria-live="polite">يا هلا بالحلوين!</span></div></header><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const lastBranchKey="sweettest:dahab:last-branch:v1";
@@ -542,7 +545,7 @@ function foodMask(kind,removed){
 function photoDessert(kind,removed){
  const ref=sweetPhotoReferences[kind];if(!ref)return illustratedDessert(kind,removed);
  const plate=photoLayer(goldPlateReference,[9,55,302,104]),mask=foodMask(kind,removed),id=uid();
- const palette=sweetColors(kind),depth=ref.round?12:9,transform=ref.round?"translate(0 7) scale(1 .93)":"translate(0 6) scale(1 .94)";
+ const palette=sweetColors(kind),depth=ref.round?12:9,transform=ref.round?"translate(0 2) scale(1 .98)":"translate(0 2) scale(1 .98)";
  const photo=photoLayer(ref,ref.round?[44,50,232,86]:[63,63,194,72]);
  // Each remaining portion has its own extruded silhouette. No depth remains after its top is removed.
  const food=mask?'<defs><clipPath id="'+id+'">'+mask+'</clipPath></defs><g transform="'+transform+'">'+Array.from({length:depth},(_,i)=>'<g transform="translate(0 '+(depth-i)+')" fill="'+(i<3?palette.dark:palette.side)+'">'+mask+'</g>').join("")+'<g clip-path="url(#'+id+')">'+photo+'</g></g>':"";
@@ -953,10 +956,17 @@ function mountSpring(){
    const y=roadY(i),side=i%2===0?1:-1,x=180+side*110;
    scenery+='<g transform="translate('+x+' '+(y+115)+')" opacity=".85"><ellipse cy="17" rx="18" ry="5" fill="#74644322"/><path d="M0 15V-15" stroke="#92744d" stroke-width="3"/><ellipse cy="-20" rx="13" ry="19" fill="#708b54"/><ellipse cx="-5" cy="-25" rx="8" ry="11" fill="#9db478"/><rect x="-9" y="12" width="18" height="6" rx="2" fill="#b8976d"/></g><g transform="translate('+(180-side*145)+' '+(y+40)+')" opacity=".8"><rect x="-15" y="-8" width="30" height="16" rx="4" fill="#c9b08c"/><circle cx="-8" cy="-2" r="5" fill="#71915d"/><circle cx="6" cy="1" r="6" fill="#809c61"/><circle cx="-6" cy="-4" r="2" fill="#e5b3a0"/><circle cx="8" cy="0" r="2" fill="#f1d29a"/></g><g transform="translate('+(180+side*145)+' '+(y-46)+')" opacity=".7"><path d="M0 19V-18Q0-25 8-25" fill="none" stroke="#88765b" stroke-width="2.5"/><rect x="5" y="-28" width="10" height="6" rx="3" fill="#e8c475"/><ellipse cy="20" rx="6" ry="2" fill="#7c6b4b44"/></g>';
   }
-  // A world-space asphalt street with concrete sidewalks and painted markings.
+  let buildings="";
+  const streetShops=["مخبز","مقهى","زهور","مكتبة","بقالة"];
+  for(let i=-3;i<items.length+3;i++){
+   const y=roadY(i),side=i%2===0?1:-1,idx=((i%5)+5)%5;
+   const wall=["#c7a680","#bda98a","#c9b99b","#d0ae91","#b5b19b"][idx],awning=["#93674f","#858b68","#a58458","#94716a","#88806c"][idx];
+   const shop=(x,yy,scale)=>'<g transform="translate('+x+' '+yy+') scale('+scale+')" opacity=".83"><ellipse cx="0" cy="39" rx="39" ry="8" fill="#7e654b22"/><path d="M-35 -26L-15 -40H43L26 -26Z" fill="#e6d8c1"/><path d="M26 -26L43 -40V31L26 42Z" fill="#a58e72"/><rect x="-35" y="-26" width="61" height="68" rx="1.5" fill="'+wall+'" stroke="#a28a6f" stroke-width=".6"/><path d="M-35 -24H26M-35 -5H26" stroke="#e8d9c4" stroke-width="2"/><rect x="-26" y="-19" width="13" height="12" fill="#666e65"/><rect x="-7" y="-19" width="13" height="12" fill="#777b6b"/><rect x="12" y="-19" width="8" height="12" fill="#777b6b"/><path d="M-20 -19V-7M-1 -19V-7" stroke="#e4d5ba" stroke-width="1"/><rect x="-29" y="0" width="49" height="10" rx="1" fill="'+awning+'"/><text x="-4.5" y="7.5" font-size="6" text-anchor="middle" font-family="Tahoma,Arial" fill="#fff5dc">'+streetShops[idx]+'</text><path d="M-30 11H21L26 19H-35Z" fill="'+awning+'"/><path d="M-30 11L-27 19M-20 11L-18 19M-10 11L-9 19M0 11L0 19M10 11L9 19M20 11L18 19" stroke="#f0dfc1" stroke-width="3"/><rect x="-27" y="19" width="28" height="19" rx="1" fill="#e6c99a" stroke="#8a745a"/><rect x="5" y="19" width="12" height="23" fill="#6b6559"/><path d="M-27 28H1M-12 19V38" stroke="#9f8464"/><circle cx="13" cy="31" r="1" fill="#f6e6c4"/></g>';
+   buildings+=shop(180+side*158,y-22,.88)+shop(180-side*158,y+88,.72);
+  }
   const roadId=uid();
   const grain=Array.from({length:160},(_,i)=>{const x=(i*37.17)%48,y=(i*19.73)%48;return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+(.25+(i%5)*.11)+'" fill="'+(i%3===0?"#fff8e9":"#b99b73")+'" opacity="'+(i%3===0?.23:.25)+'"/>'}).join("");
-  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#f8edda"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#e0c8a3"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'
+  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#f8edda"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#e0c8a3"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'+buildings
    +'<path d="'+d+'" fill="none" stroke="#82776b" stroke-width="84" opacity=".20"/>'
    +'<path d="'+d+'" fill="none" stroke="url(#'+roadId+'paving)" stroke-width="78"/>'
    +'<path d="'+d+'" fill="none" stroke="#e6dfd1" stroke-width="65"/>'

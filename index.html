@@ -555,6 +555,24 @@ function mascotPlayFrames(w,h,homeX,homeY,size,variant){
  if(variant===1)return [frame(0,0,0,1,0),frame(xRight,0,13,1,.17),frame(xRight,yMid,-10,1,.39),frame(xRight,yLow,12,1.07,.62),frame(xRight,0,-8,1,.84),frame(0,0,0,1,1)];
  return [frame(0,0,0,1,0),frame(midX,Math.min(yMid,36),-15,1,.21),frame(midX,Math.min(yMid,36)-10,12,1.13,.35),frame(midX,Math.min(yMid,36),-8,.96,.52),frame(xLeft,0,-12,1,.72),frame(0,0,0,1,1)];
 }
+function mascotPeekFrames(w,h,homeX,homeY,size,height,variant){
+ const frame=(x,y,r,opacity,offset,easing="linear")=>({transform:"translate3d("+(x-homeX)+"px,"+(y-homeY)+"px,0) rotate("+r+"deg)",opacity,offset,easing});
+ // Leave at the nearest side, then cross offscreen invisibly to a different edge.
+ const exitX=w+size+12, sideY=clamp(h*(variant===4?.57:.38),height,h-height*2);
+ const bottom=variant===3,left=variant===4;
+ const hiddenX=bottom?w*.48-size/2:left?-size-16:w+16;
+ const hiddenY=bottom?h+16:sideY;
+ const peekX=bottom?hiddenX:left?-size*.28:w-size*.72;
+ const peekY=bottom?h-height*.68:sideY;
+ const tilt=bottom?0:left?14:-14;
+ return [frame(homeX,homeY,0,1,0,"cubic-bezier(.45,0,.85,.5)"),
+ frame(exitX,homeY,-12,1,.14),frame(exitX,homeY,-12,0,.15),
+ frame(hiddenX,hiddenY,tilt,0,.16),frame(hiddenX,hiddenY,tilt,1,.17,"cubic-bezier(.1,.8,.25,1)"),
+ frame(peekX,peekY,tilt,1,.32),frame(peekX+(bottom?0:left?4:-4),peekY-(bottom?5:0),tilt*.5,1,.46),
+ frame(peekX,peekY,tilt,1,.59,"cubic-bezier(.5,0,.9,.6)"),frame(hiddenX,hiddenY,tilt,1,.73),
+ frame(hiddenX,hiddenY,tilt,0,.74),frame(exitX,homeY,10,0,.75),frame(exitX,homeY,10,1,.76,"cubic-bezier(.1,.8,.2,1)"),
+ frame(homeX-4,homeY,-5,1,.93),frame(homeX,homeY,0,1,1)];
+}
 function playMascot(){
  if(!mascotIdleAllowed()||mascotWander)return;
  const header=document.getElementById("mascot-header"),button=document.getElementById("mascot-button"),app=document.querySelector(".app");
@@ -564,8 +582,9 @@ function playMascot(){
  const sprite=document.createElement("div");sprite.className="mascot-wander";sprite.setAttribute("aria-hidden","true");sprite.innerHTML=button.innerHTML;
  Object.assign(sprite.style,{left:(b.left-a.left)+"px",top:(b.top-a.top)+"px",width:size+"px",height:b.height+"px"});
  app.appendChild(sprite);header.classList.add("wandering");
- const choices=[0,1,2].filter(i=>i!==mascotLastPlay);const variant=choices[Math.floor(Math.random()*choices.length)];mascotLastPlay=variant;
- const animation=sprite.animate(mascotPlayFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,variant),{duration:variant===2?2500:3400,easing:"ease-in-out",fill:"both"});
+ const choices=[0,1,2,3,4,5].filter(i=>i!==mascotLastPlay);const peeks=choices.filter(i=>i>=3),walks=choices.filter(i=>i<3);const pool=Math.random()<.65?peeks:walks;const variant=pool[Math.floor(Math.random()*pool.length)];mascotLastPlay=variant;
+ const frames=variant>=3?mascotPeekFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,b.height,variant):mascotPlayFrames(a.width,a.height,b.left-a.left,b.top-a.top,size,variant);
+ const animation=sprite.animate(frames,{duration:variant>=3?1150:variant===2?2500:3400,easing:variant>=3?"linear":"ease-in-out",fill:"both"});
  mascotWander={sprite,animation};
  animation.onfinish=()=>{if(mascotWander?.sprite!==sprite)return;mascotWander=null;sprite.remove();header.classList.remove("wandering");scheduleMascotPlay(9000+Math.random()*5000)};
 }
@@ -831,8 +850,8 @@ function paintSpring(){
    const count=s.items.length,rel=((dif+count/2)%count+count)%count-count/2;
    const angle=rel*2*Math.PI/Math.min(count,5);
    const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
-   const x=sine*w*.28+(s.items.length===2?depth*w*.22:0),y=(front*.18-.10)*h,z=-depth*240;
-   const scale=1-depth*.47;
+   const x=sine*w*.36+(s.items.length===2?depth*w*.30:0),y=(front*.18-.10)*h,z=-depth*240;
+   const scale=1-depth*.53;
    // Only the current plate and immediate neighbors are visible; rear plates fade before entering.
    const edgeFade=clamp((1.50-Math.abs(rel))/.45,0,1);
    const visible=edgeFade>.005;

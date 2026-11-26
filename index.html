@@ -185,18 +185,46 @@ h1,h2{font-weight:700;color:#453025}
 /* The ring is suggested by a delicate elliptical showroom shadow. */
 .dessertstage::before{content:"";position:absolute;left:10%;right:10%;top:29%;bottom:13%;border-radius:50%;background:radial-gradient(ellipse at center,#b6996b0e 0%,#b6996b08 53%,transparent 75%);border:1px solid #c9b08a36;pointer-events:none}
 .dessertstage .spring-carousel{z-index:1}
+
+.category-bar{display:flex;gap:5px;margin:0 auto;width:100%}
+.category-bar .chip{padding:5px 3px;white-space:nowrap}
+.roadstage .spring-house.is-selected{pointer-events:auto;cursor:pointer}
+.roadstage .spring-house.is-selected:focus-visible{outline:2px solid #a67a43;outline-offset:4px;border-radius:12px}
+.occasion-cards{flex:1 1 0;min-height:0;display:grid;grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;padding:8px 0}
+.occasion-card{display:flex;align-items:center;text-align:right;gap:9px;min-height:0;padding:10px;border:1px solid #cbb08b;border-radius:18px;background:linear-gradient(145deg,#fff9ed,#f0dfc3);box-shadow:0 4px 10px #68472212}
+.occasion-card:active{transform:scale(.98)}
+.occasion-art{width:40%;flex:none;max-width:165px;min-height:0;display:flex;align-items:center}
+.occasion-art svg{width:100%;max-height:100%}
+.occasion-card>div:nth-child(2){display:grid;gap:7px;flex:1}
+.occasion-card b{font-size:clamp(15px,4.3vw,20px)}
+.occasion-card small{font-size:clamp(10px,3.1vw,13px);line-height:1.5;color:var(--muted)}
+.occasion-card>span{font-size:24px;color:#936b3e}
+main[data-step="7"] .checkout-spacer{display:none}
+.event-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.guests-grid{grid-template-columns:repeat(3,1fr)}
+.event-hero{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.event-hero svg{width:100%;height:100%;max-width:290px}
+main[data-step="8"] .checkout-panel{margin-top:clamp(1px,1dvh,9px)}
+@media(max-height:570px){.category-bar .chip{padding:3px 1px;font-size:10px}.occasion-card{padding:5px}.occasion-art{width:30%}.occasion-card>div:nth-child(2){gap:2px}.event-grid{gap:3px}main[data-step="8"] .checkout-panel{margin-top:0}}
+@media(max-height:420px) and (min-width:600px){.occasion-cards{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr}main[data-step="8"]{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto minmax(0,1fr);gap:5px}main[data-step="8"]>.center{grid-column:1/-1}main[data-step="8"]>.checkout-spacer{display:none}}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
 let fulfillment="pickup",slot="20 دقيقة",zone="المنطقة الأولى",payment="wallet",proof=false,order=null,orderState=0;
+let mode="regular",category="all",occasion="عيد ميلاد",guests=20,eventDay="بكرا",eventTime="المساء";
+const eventWeight=()=>Math.ceil(guests*.15*2)/2;
+const categories=[["all","الكل"],["kunafa","كنافة"],["oriental","حلويات شرقية"]];
+const sweetIndices=()=>data.sweets.map((s,i)=>i).filter(i=>category==="all"||(category==="kunafa"?["kunafa","arabic"].includes(data.sweets[i].kind):["baklava","basbousa"].includes(data.sweets[i].kind)));
+const eventLabel=()=>occasion+" · "+guests+" ضيف · "+eventDay+" "+eventTime;
+function resetEvent(){occasion="عيد ميلاد";guests=20;eventDay="بكرا";eventTime="المساء"}
 const deliveryFee=()=>fulfillment==="delivery"?10:0, grandTotal=()=>total()+deliveryFee();
 const demoNames=[["لمسة ذهب","كنافة ذهبية بالجبنة والفستق"],["غيمة عسل","سميد محمّص بلمسة قطر"],["ليالي العنبر","كنافة عربية بالجوز والقرفة"],["تاج الفستق","رقائق مقرمشة وحشوة فستق"]];
 function fictionalize(d){return {...d,sweets:d.sweets.map((s,i)=>({...s,name:demoNames[i]?.[0]||s.name,desc:demoNames[i]?.[1]||s.desc}))}}
 const main=document.getElementById("main"), footer=document.getElementById("footer"), back=document.getElementById("back");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object.values(amounts).reduce((s,v)=>s+v,0), total=()=>data.sweets.reduce((s,v,i)=>s+(amounts[i]||0)*v.price,0);
-const money=n=>fmt(n)+" ₪", capacity=()=>data.boxes[box].capacity;
+const money=n=>fmt(n)+" ₪", capacity=()=>mode==="event"?eventWeight():data.boxes[box].capacity;
 
 /* Lightweight illustrated showroom assets. Every SVG has its own paint IDs. */
 let paintId=0;
@@ -269,17 +297,31 @@ function checkoutIcon(kind){let shapes={bag:'<path d="M5 8h14l1 13H4L5 8Z"/><pat
 function choice(act,on,title,desc,icon){return '<button class="checkout-choice '+(on?"chosen":"")+'" data-act="'+act+'" aria-pressed="'+on+'"><span class="choice-icon">'+checkoutIcon(icon)+'</span><span class="choice-copy"><b>'+title+'</b><small>'+desc+'</small></span><span class="choice-radio">'+(on?"✓":"")+'</span></button>'}
 function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" aria-pressed="'+on+'" data-act="'+esc(act)+'">'+esc(label)+'</button>'}
 function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
-function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);document.getElementById("steps").innerHTML=[0,1,2,3,4,5,6].map(i=>'<i class="'+(i<=step?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
-if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">٠١ — اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب للأعلى أو للأسفل لاختيار الفرع</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
+function categoryBar(){return '<div class="category-bar" aria-label="أصناف الحلويات">'+categories.map(([id,label])=>chip("cat:"+id,category===id,label)).join("")+'</div>'}
+function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);const sequence=mode==="event"?[0,7,8,9,2,3,4,5,6]:[0,7,1,2,3,4,5,6];const progress=sequence.indexOf(step);document.getElementById("steps").innerHTML=sequence.map((_,i)=>'<i class="'+(i<=progress?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
+if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">٠١ — اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب لاختيار الفرع أو اضغط على المحل</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
+if(step===7){
+ main.innerHTML='<div class="center"><div class="eyebrow">اختيار نوع الطلب</div><h1>حلا اليوم ولا حلا المناسبة؟</h1><p class="hint">خلّينا نجهّزلك تجربة على قد فرحتك</p></div><div class="occasion-cards"><button class="occasion-card" data-act="regular"><div class="occasion-art">'+boxArt("small")+'</div><div><b>طلب زبون</b><small>نفسي بحلو، أو بدي أضيّف كم حدا</small></div><span>‹</span></button><button class="occasion-card" data-act="event"><div class="occasion-art">'+dessert("baklava",0)+'</div><div><b>حفلة أو مناسبة</b><small>عندي عزومة أو مناسبة وبدي ضيافة مرتّبة</small></div><span>‹</span></button></div><div class="checkout-spacer"></div><p class="hint center">'+esc(b.name)+'</p>';
+ footer.innerHTML='<div class="notice center">اختار نوع الطلب لنبدأ بتجهيز تشكيلتك.</div>';
+}
+if(step===8){
+ main.innerHTML='<div class="center"><div class="eyebrow">ضيافة المناسبات</div><h1>احكيلنا عن فرحتك</h1><p class="hint">بنقترح عليك كمية حلويات تناسب عدد ضيوفك</p></div><div class="checkout-panel"><b>شو المناسبة؟</b><div class="event-grid">'+["عيد ميلاد","خطوبة أو عرس","تخرّج","عزومة"].map(x=>chip("occasion:"+x,occasion===x,x)).join("")+'</div></div><div class="checkout-panel"><b>كم ضيف متوقّع؟</b><div class="event-grid guests-grid">'+[10,20,30,50,75,100].map(x=>chip("guests:"+x,guests===x,x+" ضيف")).join("")+'</div></div><div class="checkout-panel"><b>متى المناسبة؟</b><div class="chips">'+["بكرا","بعد 3 أيام","الأسبوع الجاي"].map(x=>chip("eventday:"+x,eventDay===x,x)).join("")+'</div><div class="chips">'+["الصباح","الظهر","المساء"].map(x=>chip("eventtime:"+x,eventTime===x,x)).join("")+'</div></div><div class="checkout-spacer"></div>';
+ footer.innerHTML=primary("اقترحلي تشكيلة ضيافة","event-plan");
+}
+if(step===9){
+ const estimate=eventWeight(),avg=data.sweets.reduce((s,x)=>s+x.price,0)/data.sweets.length;
+ main.innerHTML='<div class="center"><div class="eyebrow">ضيافة على قد المناسبة</div><h1>هيك بتكفي كل ضيوفك</h1><p class="hint">'+esc(eventLabel())+'</p></div><div class="event-hero">'+boxArt("box")+'</div><div class="summary"><div class="summaryrow"><span>عدد الضيوف</span><b>'+guests+'</b></div><div class="summaryrow"><span>الكمية المقترحة</span><b>'+fmt(estimate)+' كيلو</b></div><div class="summaryrow"><span>سعر تقريبي</span><b>حوالي '+money(Math.round(estimate*avg))+'</b></div></div><div class="notice">اقتراح تجريبي على أساس 150 غرام لكل ضيف، قابل للتعديل حسب ذوقك. السعر النهائي حسب الأصناف المختارة.</div>';
+ footer.innerHTML=primary("اعتمد التشكيلة المقترحة","event-preset")+'<button class="secondary checkout-secondary" data-act="event-custom">بدي أشكّل الضيافة بنفسي</button>';
+}
 if(step===1){main.innerHTML='<div class="center"><div class="eyebrow">٠٢ — اختر البوكس</div><h1>ضيافتك على ذوقك</h1><p class="hint">'+esc(b.name)+' · اسحب يميناً أو يساراً</p></div><div class="stage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+boxArt(data.boxes[wrap(box-1,data.boxes.length)].kind)+'</div><div class="hero">'+boxArt(bx.kind)+'</div><div class="neighbor next">'+boxArt(data.boxes[wrap(box+1,data.boxes.length)].kind)+'</div></div></div>'+nav(box,data.boxes.length)+'<div class="center"><h2>'+esc(bx.name)+'</h2><p class="hint">يكفي تقريباً '+fmt(bx.capacity)+' كيلو حلويات</p></div>';footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
-if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">٠٣ — شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+nav(sweet,data.sweets.length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(capacity())+' كيلو</div><div class="progress"><i style="width:'+Math.min(100,kg()/capacity()*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
+if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">٠٣ — شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+categoryBar()+nav(selected(),catalog().length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+((kg()+.5>capacity()||(amounts[sweet]||0)>=5)?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(capacity())+' كيلو</div><div class="progress"><i style="width:'+Math.min(100,kg()/capacity()*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
 
 if(step===3){
- main.innerHTML='<div class="center"><div class="eyebrow">٠٤ — مراجعة السلة</div><h1>تشكيلة على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><p class="hint center">الأسعار والتشكيلة لأغراض العرض فقط</p>';
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٤ — مراجعة السلة</div><h1>تشكيلة على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(mode==="event"?eventLabel():bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><p class="hint center">الأسعار والتشكيلة لأغراض العرض فقط</p>';
  footer.innerHTML=primary("متابعة الطلب","checkout")+'<button class="secondary checkout-secondary" data-act="back">تعديل التشكيلة</button>';
 }
 if(step===4){
- main.innerHTML='<div class="center"><div class="eyebrow">٠٥ — استلام الطلب</div><h1>كيف بتحب تستلم طلبك؟</h1><p class="hint">اختر طريقة الاستلام المناسبة إلك</p></div><div class="checkout-options">'+choice("pickup",fulfillment==="pickup","استلام من الفرع","جهّز البوكس واستلمه بنفسك","bag")+choice("delivery",fulfillment==="delivery","توصيل لباب البيت","رسوم توصيل تجريبية 10 ₪","truck")+'</div><div class="checkout-panel">'+(fulfillment==="pickup"?'<b>وقت الوصول المتوقع</b><div class="chips">'+["20 دقيقة","40 دقيقة","ساعة"].map(x=>chip("slot:"+x,slot===x,x)).join("")+'</div>':'<b>منطقة التوصيل (تجريبية)</b><div class="chips">'+["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].map(x=>chip("zone:"+x,zone===x,x)).join("")+'</div><p class="hint">عنوان افتراضي للعرض — لا حاجة لإدخال بيانات شخصية.</p>')+'</div><div class="checkout-spacer"></div><div class="summary"><div class="summaryrow"><span>قيمة الحلويات</span><b>'+money(total())+'</b></div><div class="summaryrow"><span>التوصيل</span><b>'+money(deliveryFee())+'</b></div><div class="summaryrow"><b>الإجمالي</b><span class="bigprice">'+money(grandTotal())+'</span></div></div>';
+ main.innerHTML='<div class="center"><div class="eyebrow">٠٥ — استلام الطلب</div><h1>كيف بتحب تستلم طلبك؟</h1><p class="hint">اختر طريقة الاستلام المناسبة إلك</p></div><div class="checkout-options">'+choice("pickup",fulfillment==="pickup","استلام من الفرع","جهّز البوكس واستلمه بنفسك","bag")+choice("delivery",fulfillment==="delivery","توصيل لباب البيت","رسوم توصيل تجريبية 10 ₪","truck")+'</div><div class="checkout-panel">'+(fulfillment==="pickup"?'<b>وقت الوصول المتوقع</b><div class="chips">'+(mode==="event"?[eventDay+" "+eventTime]:["20 دقيقة","40 دقيقة","ساعة"]).map(x=>chip("slot:"+x,slot===x,x)).join("")+'</div>':'<b>منطقة التوصيل (تجريبية)</b><div class="chips">'+["المنطقة الأولى","المنطقة الثانية","المنطقة الثالثة"].map(x=>chip("zone:"+x,zone===x,x)).join("")+'</div><p class="hint">عنوان افتراضي للعرض — لا حاجة لإدخال بيانات شخصية.</p>')+'</div><div class="checkout-spacer"></div><div class="summary"><div class="summaryrow"><span>قيمة الحلويات</span><b>'+money(total())+'</b></div><div class="summaryrow"><span>التوصيل</span><b>'+money(deliveryFee())+'</b></div><div class="summaryrow"><b>الإجمالي</b><span class="bigprice">'+money(grandTotal())+'</span></div></div>';
  footer.innerHTML=primary("متابعة إلى الدفع","payment");
 }
 if(step===5){
@@ -295,10 +337,19 @@ if(step===6&&order){
 footer.insertAdjacentHTML("beforeend",'<div class="footnote"><a href="https://yoosal.net" target="_blank" rel="noopener">تطوير وكالة يوصل · YOOSAL</a></div>');mountSpring()}
 function persist(){try{localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}))}catch{}}
 function baseAction(a){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
-else if(a==="continue"&&step===0&&data.branches[branch].open)step=1;
+else if(a==="continue"&&step===0&&data.branches[branch].open)step=7;
+else if(a==="regular"&&step===7){if(mode==="event")amounts={};mode="regular";category="all";slot="20 دقيقة";proof=false;step=1}
+else if(a==="event"&&step===7){mode="event";amounts={};category="all";proof=false;step=8}
+else if(step===8&&a.startsWith("occasion:"))occasion=a.slice(9);
+else if(step===8&&a.startsWith("guests:"))guests=Number(a.slice(7));
+else if(step===8&&a.startsWith("eventday:"))eventDay=a.slice(9);
+else if(step===8&&a.startsWith("eventtime:"))eventTime=a.slice(10);
+else if(a==="event-plan"&&step===8)step=9;
+else if(step===9&&(a==="event-preset"||a==="event-custom")){amounts={};category="all";sweet=0;box=0;slot=eventDay+" "+eventTime;if(a==="event-preset"){for(let k=0;k<Math.round(capacity()*2);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+.5}}step=2}
+else if(step===2&&a.startsWith("cat:")){const next=a.slice(4);if(categories.some(x=>x[0]===next)){category=next;if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0}}
 else if(a==="custom"&&step===1)step=2;
 else if(a==="preset"&&step===1){amounts={};for(let k=0;k<Math.round(capacity()*2);k++){let i=k%data.sweets.length;amounts[i]=(amounts[i]||0)+.5}step=2}
-else if(a==="plus"&&step===2&&kg()+.5<=capacity())amounts[sweet]=(amounts[sweet]||0)+.5;
+else if(a==="plus"&&step===2&&kg()+.5<=capacity()&&(amounts[sweet]||0)<5)amounts[sweet]=(amounts[sweet]||0)+.5;
 else if(a==="minus"&&step===2)amounts[sweet]=Math.max(0,(amounts[sweet]||0)-.5);
 else if(a==="remove"&&step===2)delete amounts[sweet];
 else if(a==="review"&&step===2&&kg()>0)step=3;
@@ -307,25 +358,25 @@ else if(a==="checkout"&&step===3&&kg()>0)step=4;
 else if(step===4&&(a==="pickup"||a==="delivery")){fulfillment=a;proof=false}
 else if(step===4&&a.startsWith("slot:"))slot=a.slice(5);
 else if(step===4&&a.startsWith("zone:"))zone=a.slice(5);
-else if(a==="payment"&&step===4)step=5;
+else if(a==="payment"&&step===4){proof=false;step=5}
 else if(step===5&&(a==="wallet"||a==="cash")){payment=a;proof=false}
 else if(a==="proof"&&step===5&&payment==="wallet")proof=!proof;
 else if(a==="submit"&&step===5&&kg()>0&&(payment==="cash"||proof)){
- order={id:"ST-"+String(Math.floor(1000+Math.random()*9000)),branch:data.branches[branch].name,box:data.boxes[box].name,fulfillment,slot,zone,payment,fee:deliveryFee(),total:grandTotal(),weight:kg(),items:Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>({name:data.sweets[i].name,weight:v,price:v*data.sweets[i].price}))};orderState=0;step=6;
+ order={id:"ST-"+String(Math.floor(1000+Math.random()*9000)),branch:data.branches[branch].name,box:mode==="event"?"ضيافة "+eventLabel():data.boxes[box].name,fulfillment,slot,zone,payment,fee:deliveryFee(),total:grandTotal(),weight:kg(),items:Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>({name:data.sweets[i].name,weight:v,price:v*data.sweets[i].price}))};orderState=0;step=6;
 }
 else if(a==="advance"&&step===6&&order)orderState=Math.min(4,orderState+1);
 else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
-else if(a==="restart"){step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0}
-else if(a==="back"&&step>0&&step<6)step--;
+else if(a==="restart"){step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
+else if(a==="back"&&step>0&&step!==6){if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
 persist();draw()}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)");
 let scene=null, pointer=null, raf=0, lastTime=0, suppress=0;
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-const selected=()=>step===0?branch:step===1?box:sweet;
-const catalog=()=>step===0?data.branches:step===1?data.boxes:data.sweets;
+const selected=()=>step===0?branch:step===1?box:Math.max(0,sweetIndices().indexOf(sweet));
+const catalog=()=>step===0?data.branches:step===1?data.boxes:sweetIndices().map(i=>data.sweets[i]);
 function stopSpring(){if(raf)cancelAnimationFrame(raf);raf=0;lastTime=0;pointer=null;scene=null}
 function mountSpring(){
  stopSpring();
@@ -352,7 +403,7 @@ function mountSpring(){
  }else{
   layer=stage.querySelector(".carousel");layer.className="spring-carousel";
  }
- layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[i]||0))+'</div>').join("");
+ layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[sweetIndices()[i]]||0))+'</div>').join("");
  scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step,circular:step===2&&items.length>1};
  paintSpring();
 }
@@ -377,6 +428,8 @@ function paintSpring(){
    const x=(s.path.roadX(i)-cameraX)/360*w,y=(s.path.roadY(i)-cameraY)/410*h;
    const scale=clamp(h/340,.57,1.08)*(1-.27*Math.min(d,1.8));
    el.style.visibility=Math.abs(dif)>1.75?"hidden":"visible";
+   const tappable=i===branch&&data.branches[i].open&&Math.abs(dif)<.35;
+   el.classList.toggle("is-selected",tappable);el.tabIndex=tappable?0:-1;el.setAttribute("role","button");el.setAttribute("aria-label",data.branches[i].name);el.setAttribute("aria-disabled",String(!tappable));if(tappable)el.dataset.act="continue";else delete el.dataset.act;
    el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+clamp(s.velocity*10,-5,5)+"deg) scale("+scale+")";
   }else if(s.circular){
    // A true horizontal ring viewed from above: the front plate advances
@@ -401,7 +454,7 @@ function commitSelection(index){
  touched=true;saved=false;
  if(step===0)branch=i;
  else if(step===1){box=i;amounts={}}
- else if(step===2)sweet=i;
+ else if(step===2)sweet=sweetIndices()[i];
  persist();draw();
 }
 function tickSpring(now){
@@ -447,14 +500,14 @@ function action(a){
  if(pointer)return;
  if(scene&&(scene.circular?wrap(Math.round(scene.target)%scene.items.length,scene.items.length):Math.round(scene.target))!==selected())commitSelection(scene.target);
  const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null;
- const beforePlate=step===2?scene?.els[sweet]?.getBoundingClientRect():null;
+ const beforePlate=step===2?scene?.els[selected()]?.getBoundingClientRect():null;
  const beforePiece=step===2?main.querySelector(".boxtray .piece[data-index='"+sweet+"']")?.getBoundingClientRect():null;
  baseAction(a);
  if(step===2&&before===2&&kg()>old&&a==="plus"){
   const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']");
   if(target){flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
  }
- if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[sweet]?.getBoundingClientRect(),kind,true);
+ if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true);
  if(before!==step&&!reduceMotion.matches){
   main.animate([{opacity:0,transform:"translateY("+(step>before?14:-14)+"px)"},{opacity:1,transform:"translateY(0)"}],{duration:310,easing:"cubic-bezier(.2,.8,.2,1)"});
  }
@@ -463,7 +516,7 @@ main.addEventListener("pointerdown",e=>{
  const s=scene;if(!s||pointer||e.button!==0||e.isPrimary===false||e.target.closest("button,a,input"))return;
  if(!e.target.closest("[data-swipe]"))return;
  touched=true;
- pointer={id:e.pointerId,x:e.clientX,y:e.clientY,k:s.k,from:s.target,last:performance.now(),axis:false,rejected:false};
+ pointer={id:e.pointerId,x:e.clientX,y:e.clientY,k:s.k,from:s.target,last:performance.now(),axis:false,rejected:false,branchTap:s.vertical&&!!e.target.closest(".spring-house.is-selected")};
  s.stage.setPointerCapture?.(e.pointerId);s.stage.classList.add("dragging");
  s.velocity=0;runSpring();
 });
@@ -482,6 +535,7 @@ function release(e,canceled=false){
  const p=pointer,s=scene;if(!p||!s||p.id!==e.pointerId)return;
  pointer=null;s.stage.classList.remove("dragging");
  if(s.stage.hasPointerCapture?.(p.id))s.stage.releasePointerCapture(p.id);
+ if(p.branchTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<18&&data.branches[branch].open){suppress=Date.now()+300;action("continue");return}
  if(p.axis&&!canceled){
   suppress=Date.now()+300;
   const delta=s.vertical?e.clientY-p.y:e.clientX-p.x;

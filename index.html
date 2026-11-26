@@ -364,6 +364,11 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 
 /* The last confirmed branch is remembered locally, independent of browsing. */
 .spring-house .last-branch-badge,.house .last-branch-badge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;white-space:nowrap;margin:3px 4px 2px;padding:2px 8px;border:1px solid #b99155;background:#f4e2bb;color:#74502d;border-radius:999px;font-size:10px;font-weight:700;line-height:1.4}
+
+.roadstage .spring-house.branch-neighbor{pointer-events:auto;cursor:pointer}
+.roadstage .spring-house.branch-neighbor:focus-visible{outline:2px solid #a67a43;outline-offset:4px;border-radius:12px}
+.roadstage .spring-house.is-selected svg{filter:drop-shadow(0 8px 7px #79563835)}
+.roadstage .road{background:radial-gradient(ellipse at 50% 50%,#f5e8cf66,transparent 75%)}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><header class="mascot-header" id="mascot-header" data-mood="happy"><button class="mascot-button" id="mascot-button" type="button" aria-label="احكي مع لوزة"><svg viewBox="0 0 94 88" aria-hidden="true"><g stroke="#70482f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 58Q12 58 10 46M67 57Q81 55 83 42M10 46l-4-5m4 5 4-7m69 3 4-5m-4 5-4-6M30 69l-5 10h-8m43-10 5 10h8" fill="none"/><path d="M45 9Q49 7 53 11L80 36Q84 40 80 46L53 73Q49 77 44 74L14 47Q10 43 14 38Z" fill="#c48a46"/><path d="M45 4Q49 2 53 6L80 32Q84 36 80 42L52 67Q48 71 43 67L14 40Q10 36 14 32Z" fill="#efc67c"/><path d="M19 42L44 65 49 68 76 44M20 48l24 22m29-23L51 70" fill="none" stroke="#aa733e" stroke-width="1.2"/><path d="M23 30L44 11m15 3 13 14M27 48l10 10" fill="none" stroke="#fff0c6" stroke-width="2"/><path d="M40 13q8-8 16-1-1 7-8 9-6-1-8-8Z" fill="#849348"/></g><g fill="#70482f" class="mascot-eyes"><ellipse cx="34" cy="34" rx="3.5" ry="5"/><ellipse cx="60" cy="34" rx="3.5" ry="5"/></g><g fill="#d78f72" opacity=".75"><ellipse cx="27" cy="43" rx="5" ry="2.5"/><ellipse cx="67" cy="43" rx="5" ry="2.5"/></g><path class="mascot-mouth" d="M40 44Q47 51 54 44" fill="none" stroke="#70482f" stroke-width="2.6" stroke-linecap="round"/><path class="mascot-spark" d="M83 11v10m-5-5h10M8 15v7m-3.5-3.5h7" fill="none" stroke="#b68b43" stroke-width="2" stroke-linecap="round"/></svg></button><div class="mascot-bubble"><span class="mascot-name">لوزة</span><span id="mascot-speech" role="status" aria-live="polite">يا هلا بالحلوين!</span></div></header><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const lastBranchKey="sweettest:dahab:last-branch:v1";
@@ -819,14 +824,20 @@ function mountSpring(){
   stage.querySelectorAll(".house").forEach(el=>el.remove());
   const road=stage.querySelector(".road");
   // One continuous world-space road: its camera follows the same spring as the shops.
-  const roadX=i=>180+((i%2+2)%2===0?-1:1)*50;
+  const roadX=i=>180+((i%2+2)%2===0?-1:1)*66;
   const roadY=i=>205+i*180;
   let d="M"+roadX(-3)+" "+roadY(-3);
   for(let i=-3;i<items.length+3;i++){
    const x1=roadX(i),x2=roadX(i+1),y1=roadY(i),y2=roadY(i+1);
    d+=" C"+x1+" "+(y1+85)+" "+x2+" "+(y2-85)+" "+x2+" "+y2;
   }
-  road.innerHTML='<path d="'+d+'" fill="none" stroke="#c6ae88" stroke-width="42"/><path d="'+d+'" fill="none" stroke="#e0c8a3" stroke-width="38"/><path d="'+d+'" fill="none" stroke="#f8edda" stroke-width="29"/><path d="'+d+'" fill="none" stroke="#c19c6c" stroke-width="1.6" stroke-dasharray="7 10" stroke-linecap="round"/>';
+  let scenery="";
+  for(let i=-3;i<items.length+3;i++){
+   const y=roadY(i),side=i%2===0?1:-1,x=180+side*132;
+   // Small fixed landscape details travel with the street rather than the viewport.
+   scenery+='<g transform="translate('+x+' '+(y+68)+')" opacity=".72"><ellipse cy="12" rx="17" ry="5" fill="#b29b7333"/><path d="M0 9V-8" stroke="#97754e" stroke-width="3" stroke-linecap="round"/><circle cx="-7" cy="-10" r="9" fill="#a5a77c"/><circle cx="6" cy="-12" r="11" fill="#b6b58b"/><circle cy="-20" r="9" fill="#c8c5a0"/></g><g transform="translate('+(180-side*124)+' '+(y+100)+')" opacity=".55"><ellipse cy="8" rx="14" ry="4" fill="#b29b7333"/><circle cx="-6" r="6" fill="#b4ac81"/><circle cx="5" cy="-3" r="8" fill="#9caa83"/></g>';
+  }
+  road.innerHTML='<path d="'+d+'" fill="none" stroke="#baa580" stroke-width="50" opacity=".28"/><path d="'+d+'" fill="none" stroke="#d9c19b" stroke-width="44"/><path d="'+d+'" fill="none" stroke="#f8edda" stroke-width="33"/><path d="'+d+'" fill="none" stroke="#b99b70" stroke-width="1.6" stroke-dasharray="7 10" stroke-linecap="round"/>'+scenery;
   path={road,roadX,roadY};
   layer=document.createElement("div");layer.className="spring-carousel";
   stage.insertBefore(layer,stage.querySelector(".arrow-stack"));
@@ -854,9 +865,12 @@ function paintSpring(){
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){
   const lo=Math.floor(s.k),mix=s.k-lo,ease=mix*mix*(3-2*mix);
-  cameraX=s.path.roadX(lo)+(s.path.roadX(lo+1)-s.path.roadX(lo))*ease-180;
-  cameraY=s.k*180;
-  s.path.road.setAttribute("viewBox",cameraX.toFixed(2)+" "+cameraY.toFixed(2)+" 360 410");
+  const motion=reduceMotion.matches?0:clamp(Math.abs(s.velocity)*1.9+Math.abs(Math.sin(s.k*Math.PI))*.20,0,.45);
+  const zoom=1-motion*.12,viewW=360/zoom,viewH=410/zoom;
+  cameraX=s.path.roadX(lo)+(s.path.roadX(lo+1)-s.path.roadX(lo))*ease-viewW/2;
+  cameraY=s.k*180+205-viewH/2;
+  s.path.viewW=viewW;s.path.viewH=viewH;
+  s.path.road.setAttribute("viewBox",cameraX.toFixed(2)+" "+cameraY.toFixed(2)+" "+viewW.toFixed(2)+" "+viewH.toFixed(2));
  }
  s.els.forEach((el,i)=>{
   let dif=i-s.k,d=Math.abs(dif),sign=Math.sign(dif);
@@ -864,12 +878,15 @@ function paintSpring(){
   el.style.opacity=String(d<=1?1-d*.30:d<=2?.70-(d-1)*.42:Math.max(0,.28-(d-2)*.28));
   el.style.zIndex=String(Math.round(1000-d*100));
   if(s.vertical&&s.path){
-   const x=(s.path.roadX(i)-cameraX)/360*w,y=(s.path.roadY(i)-cameraY)/410*h;
-   const scale=clamp(h/340,.57,1.08)*(1-.27*Math.min(d,1.8));
-   el.style.visibility=Math.abs(dif)>1.75?"hidden":"visible";
-   const tappable=i===branch&&data.branches[i].open&&Math.abs(dif)<.35;
-   el.classList.toggle("is-selected",tappable);el.tabIndex=tappable?0:-1;el.setAttribute("role","button");el.setAttribute("aria-label",data.branches[i].name);el.setAttribute("aria-disabled",String(!tappable));if(tappable)el.dataset.act="continue";else delete el.dataset.act;
-   el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+clamp(s.velocity*10,-5,5)+"deg) scale("+scale+")";
+   const x=(s.path.roadX(i)-cameraX)/s.path.viewW*w,y=(s.path.roadY(i)-cameraY)/s.path.viewH*h;
+   const focus=Math.pow(Math.max(0,1-Math.min(d,1)),1.5),fade=clamp((1.85-d)/.7,0,1);
+   const scale=clamp(h/340,.56,1.06)*(.68+.32*focus+.12*Math.max(0,1-d*.8));
+   const visible=fade>.01,active=i===branch&&d<.30,neighbor=visible&&d>=.30&&d<1.35;
+   el.style.visibility=visible?"visible":"hidden";el.style.opacity=((.54+.46*focus)*fade).toFixed(3);
+   el.classList.toggle("is-selected",active);el.classList.toggle("branch-neighbor",neighbor);el.tabIndex=active||neighbor?0:-1;el.setAttribute("role","button");el.setAttribute("aria-label",data.branches[i].name);el.setAttribute("aria-disabled",String(active&&!data.branches[i].open));
+   if(active&&data.branches[i].open)el.dataset.act="continue";else if(neighbor)el.dataset.act="select-branch:"+i;else delete el.dataset.act;
+   const tilt=reduceMotion.matches?0:clamp(s.velocity*24,-8,8)*(1-focus*.45);
+   el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+tilt+"deg) scale("+scale.toFixed(3)+")";
   }else if(s.wheel){
    // Front-facing, flat rotating wheel. The products are its only visible teeth.
    const angle=dif*2*Math.PI/s.items.length,front=Math.cos(angle),sine=Math.sin(angle);
@@ -906,7 +923,10 @@ function commitSelection(index){
  let i=scene?.circular?wrap(Math.round(index)%catalog().length,catalog().length):clamp(Math.round(index),0,catalog().length-1), old=selected();
  if(i===old){if(scene){scene.k=i;scene.target=i;scene.velocity=0;paintSpring()}return}
  touched=true;saved=false;
- if(step===0)branch=i;
+ if(step===0){
+  branch=i;persist();
+  if(scene?.vertical){scene.k=i;scene.target=i;scene.velocity=0;paintSpring();const b=data.branches[i],btn=footer.querySelector('[data-act="continue"]');if(btn){btn.disabled=!b.open;btn.textContent=b.open?"اختيار الفرع":"الفرع مغلق حالياً"}mascotSelection(i);return}
+ }
  else if(step===1){box=i;amounts={}}
  else if(step===2)sweet=sweetIndices()[i];
  persist();draw();mascotSelection(i);
@@ -914,9 +934,9 @@ function commitSelection(index){
 function tickSpring(now){
  raf=0;const s=scene;if(!s)return;
  let dt=clamp((now-(lastTime||now))/16.67,.5,3);lastTime=now;
- if(!pointer||(!pointer.axis&&!s.wheel)){
-  s.velocity+=(s.target-s.k)*(s.wheel?.12:.07)*dt;
-  s.velocity*=Math.pow(s.wheel?.72:.8,dt);
+ if(!pointer||(!pointer.axis&&!s.wheel&&!s.vertical)){
+  s.velocity+=(s.target-s.k)*(s.vertical?.13:s.wheel?.12:.07)*dt;
+  s.velocity*=Math.pow(s.vertical?.76:s.wheel?.72:.8,dt);
   s.k+=s.velocity*dt;
   if(!s.circular){
    if(s.k<-.42){s.k=-.42;s.velocity=Math.max(0,s.velocity)}
@@ -933,6 +953,7 @@ function runSpring(){if(!raf){lastTime=0;raf=requestAnimationFrame(tickSpring)}}
 function navigate(delta){
  if(!scene||pointer)return;
  const s=scene,next=s.target+delta;
+ if(s.vertical&&Math.sign(delta)!==Math.sign(s.velocity))s.velocity=0;
  s.target=s.circular?next:clamp(next,0,s.items.length-1);
  if(s.target!==next-delta)mascotSelection(s.target);
  if(reduceMotion.matches){commitSelection(s.target);return}
@@ -994,6 +1015,7 @@ function expandSweetWheel(s){
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
+ if(step===0&&a.startsWith("select-branch:")&&scene?.vertical){const i=Number(a.slice(14));if(Number.isInteger(i)&&data.branches[i]){scene.target=i;scene.velocity=0;mascotSelection(i);if(reduceMotion.matches)commitSelection(i);else runSpring()}return}
  if(step===2&&a.startsWith("select-plate:")&&scene){const i=Number(a.slice(13)),n=scene.items.length;if(Number.isInteger(i)&&i>=0&&i<n){const target=i+Math.round((scene.k-i)/n)*n;scene.target=target;scene.velocity=0;mascotSelection(target);if(reduceMotion.matches)commitSelection(target);else runSpring()}return}
  if(step===2&&a.startsWith("jump-sweet:")&&scene){
   const i=Number(a.slice(11)),index=sweetIndices().indexOf(i);
@@ -1034,25 +1056,33 @@ main.addEventListener("pointerdown",e=>{
  const s=scene;if(!s||pointer||e.button!==0||e.isPrimary===false||e.target.closest("button,a,input"))return;
  const surface=e.target.closest("[data-swipe]");if(!surface)return;
  touched=true;
- const heldAt=s.k,wasMoving=s.wheel&&Math.abs(s.target-heldAt)>.04;
- pointer={id:e.pointerId,capture:surface,x:e.clientX,y:e.clientY,k:heldAt,from:s.wheel?Math.round(heldAt):s.target,last:performance.now(),axis:false,rejected:false,wasMoving,plateTap:s.step===2?e.target.closest(".sweet-neighbor")?.dataset.act:null,branchTap:s.vertical&&!!e.target.closest(".spring-house.is-selected")};
- if(s.wheel)s.target=Math.round(heldAt);
+ const heldAt=s.k,wasMoving=(s.wheel||s.vertical)&&Math.abs(s.target-heldAt)>.04;
+ pointer={id:e.pointerId,capture:surface,x:e.clientX,y:e.clientY,k:heldAt,from:(s.wheel||s.vertical)?Math.round(heldAt):s.target,last:performance.now(),axis:false,rejected:false,wasMoving,plateTap:s.step===2?e.target.closest(".sweet-neighbor")?.dataset.act:null,branchTap:s.vertical?e.target.closest(".spring-house")?.dataset.act:null};
+ if(s.wheel||s.vertical)s.target=Math.round(heldAt);
  surface.setPointerCapture?.(e.pointerId);s.stage.classList.add("dragging");
  s.velocity=0;runSpring();
 });
 main.addEventListener("pointermove",e=>{
  const p=pointer,s=scene;if(!p||!s||p.id!==e.pointerId||p.rejected)return;
  const dx=e.clientX-p.x,dy=e.clientY-p.y,primary=s.vertical?dy:dx,cross=s.vertical?dx:dy;
- const deadzone=s.vertical?18:8;
+ const deadzone=s.vertical?12:8;
  if(!p.axis){if(Math.hypot(dx,dy)<deadzone)return;if(Math.abs(cross)>Math.abs(primary)){p.rejected=true;return}p.axis=true}
  const drag=s.vertical?Math.sign(primary)*Math.max(0,Math.abs(primary)-deadzone):primary;
- const raw=p.k-drag/(s.vertical?Math.max(220,s.stage.clientHeight*.62):s.wheel?Math.max(100,s.stage.clientWidth*.31):160);
+ const raw=p.k-drag/(s.vertical?Math.max(175,s.stage.clientHeight*.52):s.wheel?Math.max(100,s.stage.clientWidth*.31):160);
  const max=s.items.length-1,elastic=raw<0?raw*.32:raw>max?max+(raw-max)*.32:raw;
  const val=s.circular?raw:clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
  const instantaneous=(val-s.k)/dt;
  s.velocity=s.wheel?(Math.sign(instantaneous)!==Math.sign(s.velocity)?instantaneous:s.velocity*.25+instantaneous*.75):s.velocity*.5+instantaneous*.5;
  s.k=val;p.last=now;paintSpring();
 });
+function branchDestination(position,velocity,delta,start,wasMoving,count){
+ const projected=Math.round(position+clamp(velocity*3,-.42,.42));
+ const direction=delta<0?1:-1;
+ let dest=projected;
+ if(!wasMoving&&Math.abs(delta)<28&&Math.abs(velocity)<.09)dest=start;
+ else if(Math.abs(delta)>=48&&dest===start)dest=start+direction;
+ return clamp(dest,Math.max(0,start-1),Math.min(count-1,start+1));
+}
 function wheelDestination(position,velocity,delta,start,wasMoving){
  // The release position, not an old animation target, determines the snap.
  const nearest=Math.round(position),projected=Math.round(position+clamp(velocity*2.5,-.45,.45));
@@ -1064,22 +1094,21 @@ function release(e,canceled=false){
  pointer=null;s.stage.classList.remove("dragging");
  if(p.capture?.hasPointerCapture?.(p.id))p.capture.releasePointerCapture(p.id);
  if(p.plateTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<8){suppress=Date.now()+300;action(p.plateTap);return}
- if(p.branchTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<18&&data.branches[branch].open){suppress=Date.now()+300;action("continue");return}
+ if(p.branchTap&&!p.axis&&!p.rejected&&!canceled&&Math.hypot(e.clientX-p.x,e.clientY-p.y)<12){suppress=Date.now()+300;action(p.branchTap);return}
  if(p.axis&&!canceled){
   suppress=Date.now()+300;
   const delta=s.vertical?e.clientY-p.y:e.clientX-p.x;
   const momentum=performance.now()-p.last>110?0:s.velocity;
   let dest=Math.round(s.k+momentum*(s.vertical?3:s.wheel?4:7));
   if(s.vertical){
-   // Short drags settle back; a deliberate gesture advances only one branch.
-   if(Math.abs(delta)<65)dest=p.from;
-   else if(Math.abs(delta)>=85&&dest===p.from)dest=p.from+(delta<0?1:-1);
-   dest=clamp(dest,p.from-1,p.from+1);
+   // Follow the actual release position; a quick deliberate flick advances one shop.
+   dest=branchDestination(s.k,momentum,delta,p.from,p.wasMoving,s.items.length);
+   s.velocity=clamp(momentum,-.23,.23);
   }else if(s.wheel){dest=wheelDestination(s.k,momentum,delta,p.from,p.wasMoving);s.velocity=clamp(momentum,-.18,.18)}
   else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
   s.target=s.wheel?dest:s.circular?clamp(dest,p.from-2,p.from+2):clamp(dest,0,s.items.length-1);
  }else{s.target=s.wheel?Math.round(s.k):p.from;s.velocity=0}
- if(p.axis&&!canceled&&Math.round(s.target)!==Math.round(p.k))mascotSelection(s.target);
+ if(p.axis&&!canceled&&Math.round(s.target)!==p.from)mascotSelection(s.target);
  if(reduceMotion.matches){commitSelection(s.target);return}
  runSpring();
 }

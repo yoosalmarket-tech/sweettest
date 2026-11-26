@@ -515,7 +515,7 @@ function mascotLine(action="step",delta=0,index=null){
  if(action.startsWith("cat:"))return [pick(["يلا نشوف "+(categories.find(x=>x[0]===category)?.[1]||"الحلويات")+"!","خلّينا نغيّر النكهة!","في اختيارات حلوة هون كمان!"]),"happy"];
  if(action.startsWith("resume:"))return ["أهلين من جديد! نكمّل حلاك؟","excited"];
  if(action==="regular")return ["حلا اليوم إله طعم تاني!","happy"];
- if(action==="event")return ["مبروك سلف! خلّينا نرتّب الضيافة.","excited"];
+ if(action==="event")return [pick(["مبروك سلف! خلّينا نرتّب الضيافة.","ألف مبروك سلف! الفرحة بدها حلا.","يا رب دايماً أفراح! خلّينا نجهّز ضيافتك.","عقبال كل مناسباتكم الحلوة!","الله يتمّم فرحتكم على خير!"]),"excited"];
  if(action==="preset"||action==="event-preset")return ["جهّزتلك تشكيلة، عدّلها زي ما بتحب!","excited"];
  if(action==="custom"||action==="event-custom")return ["إنت الشيف اليوم، وأنا بساعدك!","wink"];
  if(action==="pickup")return ["بنكون ناطرينك بالفرع!","happy"];
@@ -774,7 +774,7 @@ else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
 else if(a==="restart"){selectionId=null;step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
 else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
-persist();if(render)draw(!(a==="continue"&&step===7))}
+persist();if(render)draw(!((a==="continue"&&step===7)||(a==="event"&&step===8)))}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)");

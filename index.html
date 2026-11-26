@@ -181,7 +181,7 @@ h1,h2{font-weight:700;color:#453025}
 #receipt-dialog .notice{margin-top:9px}
 @media(max-height:570px){.checkout-options{gap:4px;margin-top:2px}.checkout-choice{padding:5px 8px;gap:7px}.choice-icon{width:30px;height:30px}.choice-icon svg{width:20px;height:20px}.choice-copy{gap:1px}.checkout-panel{padding:6px;gap:3px}.chip{padding:5px 2px}.proof-button{min-height:28px}.proof-button svg{width:19px;height:19px}.demo-account{padding:3px 5px}.checkout-secondary{min-height:28px;margin-top:4px}.timeline-item{min-height:27px}.timeline-item i{width:23px;height:23px}.timeline-item:not(:last-child):after{right:11px}.timeline-item span{font-size:9px}.order-success{margin:1px auto}}
 @media(max-height:420px) and (min-width:600px){main[data-step="4"],main[data-step="5"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;column-gap:10px}main[data-step="4"]>.center,main[data-step="5"]>.center{grid-column:1/-1}main[data-step="4"]>.checkout-options,main[data-step="5"]>.checkout-options{grid-column:1;grid-row:2;align-self:start}main[data-step="4"]>.checkout-panel,main[data-step="5"]>.checkout-panel{grid-column:2;grid-row:2;align-self:start}main[data-step="4"]>.summary,main[data-step="5"]>.summary{grid-column:1/-1;grid-row:3}main[data-step="4"]>.checkout-spacer,main[data-step="5"]>.checkout-spacer{display:none}main[data-step="6"]{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) auto auto;gap:4px}main[data-step="6"]>.center:first-child{grid-column:1;grid-row:1;align-self:center}main[data-step="6"]>.timeline{grid-column:2;grid-row:1}main[data-step="6"]>.summary{grid-column:1/-1;grid-row:2}main[data-step="6"]>.hint{grid-column:1/-1;grid-row:3}main[data-step="6"]>.checkout-spacer{display:none}}
-</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
+.roadstage .road{overflow:hidden;will-change:contents;pointer-events:none}.roadstage .spring-house{pointer-events:none}</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 let data=fallback, step=0, branch=0, box=0, sweet=0, amounts={}, touched=false, saved=false;
@@ -332,7 +332,17 @@ function mountSpring(){
  let layer, path=null;
  if(vertical){
   stage.querySelectorAll(".house").forEach(el=>el.remove());
-  path=stage.querySelector(".road path:last-child");
+  const road=stage.querySelector(".road");
+  // One continuous world-space road: its camera follows the same spring as the shops.
+  const roadX=i=>180+((i%2+2)%2===0?-1:1)*50;
+  const roadY=i=>205+i*180;
+  let d="M"+roadX(-3)+" "+roadY(-3);
+  for(let i=-3;i<items.length+3;i++){
+   const x1=roadX(i),x2=roadX(i+1),y1=roadY(i),y2=roadY(i+1);
+   d+=" C"+x1+" "+(y1+85)+" "+x2+" "+(y2-85)+" "+x2+" "+y2;
+  }
+  road.innerHTML='<path d="'+d+'" fill="none" stroke="#c6ae88" stroke-width="42"/><path d="'+d+'" fill="none" stroke="#e0c8a3" stroke-width="38"/><path d="'+d+'" fill="none" stroke="#f8edda" stroke-width="29"/><path d="'+d+'" fill="none" stroke="#c19c6c" stroke-width="1.6" stroke-dasharray="7 10" stroke-linecap="round"/>';
+  path={road,roadX,roadY};
   layer=document.createElement("div");layer.className="spring-carousel";
   stage.insertBefore(layer,stage.querySelector(".arrow-stack"));
  }else{
@@ -347,15 +357,22 @@ function paintSpring(){
  const w=s.stage.clientWidth,h=s.stage.clientHeight,side=clamp(w*.46,82,255);
  if(!w||!h)return;
  s.stage.style.setProperty("--art-width",Math.max(64,Math.min(w*.86,h*(s.step===2?1.78:1.45),s.step===2?330:365))+"px");
+ let cameraX=0,cameraY=0;
+ if(s.vertical&&s.path){
+  const lo=Math.floor(s.k),mix=s.k-lo,ease=mix*mix*(3-2*mix);
+  cameraX=s.path.roadX(lo)+(s.path.roadX(lo+1)-s.path.roadX(lo))*ease-180;
+  cameraY=s.k*180;
+  s.path.road.setAttribute("viewBox",cameraX.toFixed(2)+" "+cameraY.toFixed(2)+" 360 410");
+ }
  s.els.forEach((el,i)=>{
   let dif=i-s.k,d=Math.abs(dif),sign=Math.sign(dif);
   el.style.visibility=d>2.4?"hidden":"visible";
   el.style.opacity=String(d<=1?1-d*.30:d<=2?.70-(d-1)*.42:Math.max(0,.28-(d-2)*.28));
   el.style.zIndex=String(Math.round(1000-d*100));
   if(s.vertical&&s.path){
-   let p=s.path.getPointAtLength(s.path.getTotalLength()*clamp(.49+dif*.35,-.0,1));
-   let x=clamp(p.x/360*w,Math.min(w*.24,85),w-Math.min(w*.24,85)),y=clamp(p.y/410*h,h*.16,h*.84);
-   let scale=clamp(h/340,.57,1.08)*(1-.29*Math.min(d,1.8));
+   const x=(s.path.roadX(i)-cameraX)/360*w,y=(s.path.roadY(i)-cameraY)/410*h;
+   const scale=clamp(h/340,.57,1.08)*(1-.27*Math.min(d,1.8));
+   el.style.visibility=Math.abs(dif)>1.75?"hidden":"visible";
    el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,0) translate(-50%,-50%) rotateZ("+clamp(s.velocity*10,-5,5)+"deg) scale("+scale+")";
   }else{
    let x=sign*Math.min(d,1.25)*side,y=Math.min(d,2.5)*18,z=-Math.min(d,3)*240;
@@ -436,8 +453,10 @@ main.addEventListener("pointerdown",e=>{
 main.addEventListener("pointermove",e=>{
  const p=pointer,s=scene;if(!p||!s||p.id!==e.pointerId||p.rejected)return;
  const dx=e.clientX-p.x,dy=e.clientY-p.y,primary=s.vertical?dy:dx,cross=s.vertical?dx:dy;
- if(!p.axis){if(Math.hypot(dx,dy)<8)return;if(Math.abs(cross)>Math.abs(primary)){p.rejected=true;return}p.axis=true}
- const raw=p.k-primary/(s.vertical?Math.max(110,s.stage.clientHeight*.36):160);
+ const deadzone=s.vertical?18:8;
+ if(!p.axis){if(Math.hypot(dx,dy)<deadzone)return;if(Math.abs(cross)>Math.abs(primary)){p.rejected=true;return}p.axis=true}
+ const drag=s.vertical?Math.sign(primary)*Math.max(0,Math.abs(primary)-deadzone):primary;
+ const raw=p.k-drag/(s.vertical?Math.max(220,s.stage.clientHeight*.62):160);
  const max=s.items.length-1,elastic=raw<0?raw*.32:raw>max?max+(raw-max)*.32:raw;
  const val=clamp(elastic,-.42,max+.42),now=performance.now(),dt=Math.max((now-p.last)/16.67,.5);
  s.velocity=s.velocity*.5+(val-s.k)/dt*.5;s.k=val;p.last=now;paintSpring();
@@ -450,8 +469,13 @@ function release(e,canceled=false){
   suppress=Date.now()+300;
   const delta=s.vertical?e.clientY-p.y:e.clientX-p.x;
   const momentum=performance.now()-p.last>110?0:s.velocity;
-  let dest=Math.round(s.k+momentum*7);
-  if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
+  let dest=Math.round(s.k+momentum*(s.vertical?3:7));
+  if(s.vertical){
+   // Short drags settle back; a deliberate gesture advances only one branch.
+   if(Math.abs(delta)<65)dest=p.from;
+   else if(Math.abs(delta)>=85&&dest===p.from)dest=p.from+(delta<0?1:-1);
+   dest=clamp(dest,p.from-1,p.from+1);
+  }else if(Math.abs(delta)>=45&&dest===p.from)dest=p.from+(delta<0?1:-1);
   s.target=clamp(dest,0,s.items.length-1);
  }else{s.target=p.from;s.velocity=0}
  if(reduceMotion.matches){commitSelection(s.target);return}

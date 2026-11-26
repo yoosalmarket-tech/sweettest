@@ -294,7 +294,34 @@ main[data-step="2"] .sweet-name{font-size:clamp(20px,5.8vw,27px)}
 .boxtray .piece b{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 @media(max-height:570px){.dots-count{padding:0;font-size:10px}}
-</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
+
+/* Short branded splash while the catalog loads; cached demo catalog works offline. */
+.loading-screen{position:absolute;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at 50% 42%,#fff9ed,#ead6b7);color:#60432f;text-align:center;transition:opacity .26s ease,visibility .26s}
+.loading-screen.loading-done{opacity:0;visibility:hidden}
+.loading-art{width:min(53%,225px);animation:loading-float 1.65s ease-in-out infinite}
+.loading-art svg{width:100%;display:block}
+.loading-screen h1{font-size:clamp(26px,7vw,36px);margin:0}
+.loading-screen p{font-size:14px;color:#93734f;margin:0}
+.loading-track{height:4px;width:115px;border-radius:10px;background:#c8ae8b66;overflow:hidden;margin-top:10px}
+.loading-track i{display:block;height:100%;width:42%;background:#a57a44;border-radius:10px;animation:loading-progress 1.2s ease-in-out infinite}
+@keyframes loading-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes loading-progress{0%{transform:translateX(-120%)}100%{transform:translateX(245%)}}
+.previous-selections{flex:0 0 auto;min-width:0;display:grid;gap:5px;margin:0 0 3px}
+.previous-heading{display:flex;justify-content:space-between;align-items:center;color:#654931;font-size:13px}
+.previous-heading small{font-size:10px;color:#9a7b58}
+.previous-list{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:thin;touch-action:pan-x}
+.previous-card{flex:0 0 100%;min-width:0;display:flex;align-items:center;gap:5px;scroll-snap-align:start;text-align:right;background:#fff8e9;border:1px solid #cbb08a;border-radius:12px;padding:5px;color:#64452e}
+.previous-card:disabled{opacity:.5}
+.previous-art{width:clamp(42px,14vw,65px);flex-shrink:0}
+.previous-art svg{display:block;width:100%}
+.previous-copy{flex:1;min-width:0;display:grid;gap:2px}
+.previous-copy b,.previous-copy small{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.previous-copy b{font-size:12px}
+.previous-copy small,.previous-copy span{font-size:10px;color:#826344}
+.previous-card>strong{font-size:10px;white-space:nowrap;background:#e9d7b8;border-radius:8px;padding:7px 5px}
+@media(max-height:570px){.previous-heading{font-size:11px}.previous-art{width:40px}.previous-card{padding:3px}.previous-copy{gap:0}.previous-copy b{font-size:11px}.previous-copy small,.previous-copy span{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.loading-art,.loading-track i{animation:none}.loading-screen{transition:none}}
+</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 const packageExtras=[
@@ -445,7 +472,7 @@ function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" ar
 function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
 function categoryBar(){return '<div class="category-bar" aria-label="أصناف الحلويات">'+categories.map(([id,label])=>chip("cat:"+id,category===id,label)).join("")+'</div>'}
 function draw(){syncRoute();main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);const sequence=mode==="event"?[0,7,8,9,2,3,4,5,6]:[0,7,1,2,3,4,5,6];const progress=sequence.indexOf(step);document.getElementById("steps").innerHTML=sequence.map((_,i)=>'<i class="'+(i<=progress?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
-if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب لاختيار الفرع أو اضغط على المحل</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
+if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب لاختيار الفرع أو اضغط على المحل</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';main.insertAdjacentHTML("beforeend",previousSelections());footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
 if(step===7){
  main.innerHTML='<div class="center"><div class="eyebrow">اختيار نوع الطلب</div><h1>حلا اليوم ولا حلا المناسبة؟</h1><p class="hint">خلّينا نجهّزلك تجربة على قد فرحتك</p></div><div class="occasion-cards"><button class="occasion-card" data-act="regular"><div class="occasion-art">'+boxArt("small")+'</div><div><b>طلب زبون</b><small>نفسي بحلو، أو بدي أضيّف كم حدا</small></div><span>‹</span></button><button class="occasion-card" data-act="event"><div class="occasion-art">'+dessert("baklava",0)+'</div><div><b>حفلة أو مناسبة</b><small>عندي عزومة أو مناسبة وبدي ضيافة مرتّبة</small></div><span>‹</span></button></div><div class="checkout-spacer"></div><p class="hint center">'+esc(b.name)+'</p>';
  footer.innerHTML='<div class="notice center">اختار نوع الطلب لنبدأ بتجهيز تشكيلتك.</div>';
@@ -489,6 +516,23 @@ footer.insertAdjacentHTML("beforeend",'<div class="footnote"><a href="https://yo
 const stepPaths={0:"/branches",7:"/order-type",1:"/packages",2:"/sweets",3:"/cart",4:"/fulfillment",5:"/payment",6:"/tracking",8:"/events",9:"/events/recommendation"};
 const routeTitles={0:"اختر الفرع",7:"نوع الطلب",1:"اختر البوكس",2:"شكّل البوكس",3:"السلة",4:"استلام الطلب",5:"الدفع",6:"متابعة الطلب",8:"ضيافة المناسبات",9:"التشكيلة المقترحة"};
 let routeReplace=true;
+let selectionId=null;
+const savedKey="sweettest:selections:v1";
+function savedSelections(){try{const rows=JSON.parse(localStorage.getItem(savedKey)||"[]");return Array.isArray(rows)?rows.filter(x=>x&&typeof x.id==="string"&&x.snapshot&&x.snapshot.amounts&&data.branches[x.snapshot.branch]&&data.boxes[x.snapshot.box]).slice(0,3):[]}catch{return []}}
+function journeySnapshot(){return {branch,box,sweet,amounts:{...amounts},mode,category,occasion,guests,eventDay,eventTime,fulfillment,slot,zone,payment,proof,order,orderState,selectionId}}
+function rememberSelection(){
+ if(![2,3,4,5,6].includes(step))return;
+ try{let rows=savedSelections();if(kg()<=0){if(selectionId)rows=rows.filter(x=>x.id!==selectionId||x.complete);localStorage.setItem(savedKey,JSON.stringify(rows));return}
+ if(!selectionId)selectionId=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);
+ const snapshot=journeySnapshot(),complete=step===6&&!!order;
+ const old=rows.find(x=>x.id===selectionId);if(old?.complete&&!complete){selectionId=null;return}
+ rows=[{id:selectionId,snapshot,complete:complete||!!old?.complete},...rows.filter(x=>x.id!==selectionId)].slice(0,3);
+ localStorage.setItem(savedKey,JSON.stringify(rows));
+ }catch{}
+}
+function previousSelections(){const rows=savedSelections();if(!rows.length)return "";return '<section class="previous-selections"><div class="previous-heading"><b>تشكيلاتك السابقة</b><small>محفوظة على هالجهاز</small></div><div class="previous-list">'+rows.map(r=>{const q=r.snapshot,weight=Object.entries(q.amounts).reduce((sum,[i,v])=>sum+(data.sweets[i]&&Number.isFinite(v)?v:0),0),price=Object.entries(q.amounts).reduce((sum,[i,v])=>sum+(data.sweets[i]&&Number.isFinite(v)?v*data.sweets[i].price:0),0),label=q.mode==="event"?"ضيافة "+q.occasion:data.boxes[q.box].name,available=data.branches[q.branch].open;return '<button class="previous-card" data-act="resume:'+esc(r.id)+'" '+(!available?"disabled":"")+'><div class="previous-art">'+boxArt(data.boxes[q.box].kind)+'</div><div class="previous-copy"><b>'+esc(label)+'</b><small>'+esc(data.branches[q.branch].name)+' · '+fmt(weight)+' كغ</small><span>'+money(price)+'</span></div><strong>'+(available?(r.complete?"اطلبها مجدداً":"كمّل تشكيلتك"):"الفرع مغلق")+'</strong></button>'}).join("")+'</div></section>'}
+function resumeSelection(id){const row=savedSelections().find(x=>x.id===id);if(!row||!data.branches[row.snapshot.branch]?.open||!restoreJourney(row.snapshot))return false;selectionId=row.complete?null:row.id;order=null;orderState=0;proof=false;step=2;return true}
+function migratePrevious(){if(savedSelections().length||kg()<=0)return;const current=step;step=order?6:2;rememberSelection();step=current}
 function readRoute(path){const clean=path.replace(/\/+$/,"")||"/";return clean==="/"||clean==="/index.html"?0:Number(Object.keys(stepPaths).find(k=>stepPaths[k]===clean)??0)}
 function safeStep(next){
  if(next===6&&!order)return kg()>0?3:2;
@@ -507,14 +551,15 @@ function syncRoute(){
 function persist(){
  try{
   if(mode!=="event")localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}));
-  sessionStorage.setItem("sweettest:journey:v2",JSON.stringify({branch,box,sweet,amounts,mode,category,occasion,guests,eventDay,eventTime,fulfillment,slot,zone,payment,proof,order,orderState}));
+  rememberSelection();
+  sessionStorage.setItem("sweettest:journey:v2",JSON.stringify(journeySnapshot()));
  }catch{}
 }
-function restoreJourney(){
+function restoreJourney(snapshot){
  try{
-  const p=JSON.parse(sessionStorage.getItem("sweettest:journey:v2"));
+  const p=snapshot||JSON.parse(sessionStorage.getItem("sweettest:journey:v2"));
   if(!p||!Number.isInteger(p.branch)||!data.branches[p.branch]||!Number.isInteger(p.box)||!data.boxes[p.box]||!Number.isInteger(p.sweet)||!data.sweets[p.sweet])return false;
-  branch=p.branch;box=p.box;sweet=p.sweet;mode=p.mode==="event"?"event":"regular";
+  branch=p.branch;box=p.box;sweet=p.sweet;mode=p.mode==="event"?"event":"regular";selectionId=typeof p.selectionId==="string"?p.selectionId:null;
   category=categories.some(x=>x[0]===p.category)?p.category:"all";
   if(!sweetIndices().includes(sweet))sweet=sweetIndices()[0]||0;
   occasion=["عيد ميلاد","خطوبة أو عرس","تخرّج","عزومة"].includes(p.occasion)?p.occasion:"عيد ميلاد";
@@ -540,7 +585,8 @@ function openRoute(path){
 }
 window.addEventListener("popstate",()=>{touched=true;openRoute(location.pathname);persist()});
 function baseAction(a){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
-else if(a==="continue"&&step===0&&data.branches[branch].open)step=7;
+else if(step===0&&a.startsWith("resume:")){resumeSelection(a.slice(7))}
+else if(a==="continue"&&step===0&&data.branches[branch].open){selectionId=null;amounts={};mode="regular";category="all";order=null;orderState=0;proof=false;step=7;}
 else if(a==="regular"&&step===7){if(mode==="event")amounts={};mode="regular";category="all";slot="20 دقيقة";proof=false;step=1}
 else if(a==="event"&&step===7){mode="event";amounts={};category="all";proof=false;step=8}
 else if(step===8&&a.startsWith("occasion:"))occasion=a.slice(9);
@@ -571,7 +617,7 @@ else if(a==="submit"&&step===5&&kg()>0&&(payment==="cash"||proof)){
 else if(a==="advance"&&step===6&&order)orderState=Math.min(4,orderState+1);
 else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
-else if(a==="restart"){step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
+else if(a==="restart"){selectionId=null;step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
 else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
 persist();draw()}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
@@ -619,7 +665,7 @@ function paintSpring(){
  const infoHeight=packageInfo?.offsetHeight||130;
  const artWidth=Math.max(52,s.wheel?Math.min(w*.52,h*.70,230,Math.max(52,(h*.73-infoHeight-12)*2*320/220)):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
  s.stage.style.setProperty("--art-width",artWidth+"px");
- if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.max(0,Math.min(h-infoHeight-5,h*.27+artWidth*220/320/2+5)))+"px");
+ if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.max(0,Math.min(h-infoHeight-5,h*.27+artWidth*220/320/2+clamp(h*.10,16,42))))+"px");
  if(s.wheel){const index=wrap(Math.round(s.k)%s.items.length,s.items.length);if(index!==s.shown){s.shown=index;const x=s.items[index];document.getElementById("package-name").textContent=x.name;document.getElementById("package-desc").textContent=x.desc;document.getElementById("package-capacity").textContent=fmt(x.capacity)+" كيلو";main.querySelectorAll(".dots span").forEach((dot,i)=>dot.classList.toggle("on",i===index))}}
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){
@@ -822,6 +868,10 @@ main.addEventListener("click",e=>{if(Date.now()<suppress){e.preventDefault();e.s
 window.addEventListener("resize",()=>paintSpring(),{passive:true});
 if(window.visualViewport)window.visualViewport.addEventListener("resize",()=>paintSpring(),{passive:true});
 function restore(){try{let p=JSON.parse(localStorage.getItem("sweettest:v1"));if(p&&Number.isInteger(p.branch)&&Number.isInteger(p.box)&&Number.isInteger(p.sweet)&&p.branch>=0&&p.branch<data.branches.length&&p.box>=0&&p.box<data.boxes.length&&p.sweet>=0&&p.sweet<data.sweets.length){branch=p.branch;box=p.box;sweet=p.sweet;amounts={};for(let [i,v] of Object.entries(p.amounts||{})){if(data.sweets[i]&&Number.isFinite(v)&&v>=0&&v%quantityStep===0&&kg()+v<=capacity())amounts[i]=v}}}catch{}}
-if(!restoreJourney())restore();openRoute(location.pathname);
-const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(4500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!touched&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length){data=fictionalize(d);branch=box=sweet=0;amounts={};if(!restoreJourney())restore();openRoute(location.pathname)}}).catch(()=>{});
+const loading=document.getElementById("loading-screen"),loadingArt=document.getElementById("loading-art");
+loadingArt.innerHTML=boxArt("gift");
+const bootStart=performance.now();let bootFinished=false;
+function finishBoot(){if(bootFinished)return;bootFinished=true;if(!restoreJourney())restore();migratePrevious();openRoute(location.pathname);const reveal=()=>{loading.classList.add("loading-done");loading.setAttribute("aria-hidden","true");loading.style.pointerEvents="none";setTimeout(()=>loading.remove(),300)};setTimeout(reveal,Math.max(0,350-(performance.now()-bootStart)))}
+const key="sb_publishable_bci0EdNv53nVc8F_GaG47w_-cV2Dl9o";fetch("https://xdmdknysnwxcygxvhxav.supabase.co/rest/v1/sweet_catalog?id=eq.demo&select=data",{headers:{apikey:key},signal:AbortSignal.timeout(2500)}).then(r=>{if(!r.ok)throw Error("catalog");return r.json()}).then(rows=>{let d=rows[0]?.data;if(!bootFinished&&d&&d.branches?.length&&d.boxes?.length&&d.sweets?.length)data=fictionalize(d)}).catch(()=>{}).finally(finishBoot);
+setTimeout(finishBoot,2700);
 </script></body></html>

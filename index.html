@@ -540,7 +540,11 @@ function foodMask(kind,removed){
 function photoDessert(kind,removed){
  const ref=sweetPhotoReferences[kind];if(!ref)return illustratedDessert(kind,removed);
  const plate=photoLayer(goldPlateReference,[9,55,302,104]),mask=foodMask(kind,removed),id=uid();
- const food=mask?'<defs><clipPath id="'+id+'">'+mask+'</clipPath></defs><g clip-path="url(#'+id+')">'+photoLayer(ref,ref.round?[44,50,232,86]:[63,63,194,72])+'</g>':"";
+ const palette=sweetColors(kind),depth=ref.round?12:9,transform=ref.round?"translate(0 17) scale(1 .82)":"translate(0 15) scale(1 .85)";
+ const photo=photoLayer(ref,ref.round?[44,50,232,86]:[63,63,194,72]);
+ // Each remaining portion has its own extruded silhouette. No depth remains after its top is removed.
+ const food=mask?'<defs><clipPath id="'+id+'">'+mask+'</clipPath></defs><g transform="'+transform+'">'+Array.from({length:depth},(_,i)=>'<g transform="translate(0 '+(depth-i)+')" fill="'+(i<3?palette.dark:palette.side)+'">'+mask+'</g>').join("")+'<g clip-path="url(#'+id+')">'+photo+'</g></g>':"";
+
  return referenceArt(illustratedDessert(kind,removed),plate+food,174);
 }
 
@@ -943,17 +947,21 @@ function mountSpring(){
    // Small fixed landscape details travel with the street rather than the viewport.
    scenery+='<g transform="translate('+x+' '+(y+68)+')" opacity=".72"><ellipse cy="12" rx="17" ry="5" fill="#b29b7333"/><path d="M0 9V-8" stroke="#97754e" stroke-width="3" stroke-linecap="round"/><circle cx="-7" cy="-10" r="9" fill="#a5a77c"/><circle cx="6" cy="-12" r="11" fill="#b6b58b"/><circle cy="-20" r="9" fill="#c8c5a0"/></g><g transform="translate('+(180-side*124)+' '+(y+100)+')" opacity=".55"><ellipse cy="8" rx="14" ry="4" fill="#b29b7333"/><circle cx="-6" r="6" fill="#b4ac81"/><circle cx="5" cy="-3" r="8" fill="#9caa83"/></g>';
   }
+  for(let i=-3;i<items.length+3;i++){
+   const y=roadY(i),side=i%2===0?1:-1,x=180+side*110;
+   scenery+='<g transform="translate('+x+' '+(y+115)+')" opacity=".85"><ellipse cy="17" rx="18" ry="5" fill="#74644322"/><path d="M0 15V-15" stroke="#92744d" stroke-width="3"/><ellipse cy="-20" rx="13" ry="19" fill="#708b54"/><ellipse cx="-5" cy="-25" rx="8" ry="11" fill="#9db478"/><rect x="-9" y="12" width="18" height="6" rx="2" fill="#b8976d"/></g><g transform="translate('+(180-side*145)+' '+(y+40)+')" opacity=".8"><rect x="-15" y="-8" width="30" height="16" rx="4" fill="#c9b08c"/><circle cx="-8" cy="-2" r="5" fill="#71915d"/><circle cx="6" cy="1" r="6" fill="#809c61"/><circle cx="-6" cy="-4" r="2" fill="#e5b3a0"/><circle cx="8" cy="0" r="2" fill="#f1d29a"/></g><g transform="translate('+(180+side*145)+' '+(y-46)+')" opacity=".7"><path d="M0 19V-18Q0-25 8-25" fill="none" stroke="#88765b" stroke-width="2.5"/><rect x="5" y="-28" width="10" height="6" rx="3" fill="#e8c475"/><ellipse cy="20" rx="6" ry="2" fill="#7c6b4b44"/></g>';
+  }
   // A world-space asphalt street with concrete sidewalks and painted markings.
   const roadId=uid();
-  const grain=Array.from({length:160},(_,i)=>{const x=(i*37.17)%48,y=(i*19.73)%48;return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+(.25+(i%5)*.11)+'" fill="'+(i%3===0?"#b8b5ae":"#22272b")+'" opacity="'+(i%3===0?.23:.25)+'"/>'}).join("");
-  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#53565a"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#d5cbb9"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'
+  const grain=Array.from({length:160},(_,i)=>{const x=(i*37.17)%48,y=(i*19.73)%48;return '<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+(.25+(i%5)*.11)+'" fill="'+(i%3===0?"#fff8e9":"#b99b73")+'" opacity="'+(i%3===0?.23:.25)+'"/>'}).join("");
+  road.innerHTML='<defs><pattern id="'+roadId+'asphalt" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#f8edda"/>'+grain+'</pattern><pattern id="'+roadId+'paving" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#e0c8a3"/><path d="M0 0H12M0 0V10" stroke="#b9ad99" stroke-width=".7"/></pattern></defs>'
    +'<path d="'+d+'" fill="none" stroke="#82776b" stroke-width="84" opacity=".20"/>'
    +'<path d="'+d+'" fill="none" stroke="url(#'+roadId+'paving)" stroke-width="78"/>'
    +'<path d="'+d+'" fill="none" stroke="#e6dfd1" stroke-width="65"/>'
-   +'<path d="'+d+'" fill="none" stroke="#88837b" stroke-width="61"/>'
-   +'<path d="'+d+'" fill="none" stroke="#d9d5ca" stroke-width="58"/>'
+   +'<path d="'+d+'" fill="none" stroke="#c6ae88" stroke-width="61"/>'
+   +'<path d="'+d+'" fill="none" stroke="#e0c8a3" stroke-width="58"/>'
    +'<path d="'+d+'" fill="none" stroke="url(#'+roadId+'asphalt)" stroke-width="54"/>'
-   +'<path d="'+d+'" fill="none" stroke="#f3ead1" stroke-width="1.8" stroke-dasharray="10 12" stroke-linecap="butt" opacity=".94"/>'+scenery;
+   +'<path d="'+d+'" fill="none" stroke="#c19c6c" stroke-width="1.8" stroke-dasharray="10 12" stroke-linecap="butt" opacity=".94"/>'+scenery;
   path={road,roadX,roadY};
   layer=document.createElement("div");layer.className="spring-carousel";
   stage.insertBefore(layer,stage.querySelector(".arrow-stack"));
@@ -1146,12 +1154,7 @@ function refreshSweetQuantity(){
 function expandSweetWheel(s){
  if(!s||reduceMotion.matches||!Element.prototype.animate)return;
  s.expandAnimation?.cancel();
- s.expandAnimation=s.layer.animate([
- {transform:"perspective(850px) rotateX(0deg) scale(1)",offset:0},
- {transform:"perspective(850px) rotateX(-24deg) scale(1.04)",offset:.18},
- {transform:"perspective(850px) rotateX(18deg) scale(1.08)",offset:.58},
- {transform:"perspective(850px) rotateX(0deg) scale(1)",offset:1}
- ],{duration:780,easing:"cubic-bezier(.22,.72,.25,1)"});
+ s.expandAnimation=s.layer.animate([{transform:"scale(1)"},{transform:"scale(1.08)",offset:.4},{transform:"scale(1)"}],{duration:420,easing:"ease-out"});
 }
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}

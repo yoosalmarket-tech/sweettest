@@ -321,7 +321,7 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .previous-card>strong{font-size:10px;white-space:nowrap;background:#e9d7b8;border-radius:8px;padding:7px 5px}
 @media(max-height:570px){.previous-heading{font-size:11px}.previous-art{width:40px}.previous-card{padding:3px}.previous-copy{gap:0}.previous-copy b{font-size:11px}.previous-copy small,.previous-copy span{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.loading-art,.loading-track i{animation:none}.loading-screen{transition:none}}
-</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
+.dessertstage .spring-carousel{transform-origin:50% 62%;will-change:transform}.boxtray .empty{flex:1}</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 const packageExtras=[
@@ -471,6 +471,7 @@ function choice(act,on,title,desc,icon){return '<button class="checkout-choice '
 function chip(act,on,label){return '<button class="chip '+(on?"chosen":"")+'" aria-pressed="'+on+'" data-act="'+esc(act)+'">'+esc(label)+'</button>'}
 function showReceipt(){if(!order)return;const d=document.getElementById("receipt-dialog");d.innerHTML='<div class="receipt-head"><b>إيصال تجريبي #'+esc(order.id)+'</b><button class="round" data-act="close-receipt" aria-label="إغلاق">×</button></div><p class="hint">'+esc(order.branch)+' · '+esc(order.box)+'</p><div class="receipt-items">'+order.items.map(x=>'<div class="summaryrow"><span>'+esc(x.name)+' · '+fmt(x.weight)+' كغ</span><b>'+money(x.price)+'</b></div>').join("")+'<div class="summaryrow"><span>التوصيل</span><b>'+money(order.fee)+'</b></div><div class="summaryrow"><b>الإجمالي</b><b>'+money(order.total)+'</b></div></div><p class="hint">طريقة الدفع: '+(order.payment==="wallet"?"محفظة تجريبية":"نقداً")+'</p><div class="notice">إيصال للعرض فقط، ليس إثبات دفع حقيقي.</div>';d.showModal()}
 function categoryBar(){return '<div class="category-bar" aria-label="أصناف الحلويات">'+categories.map(([id,label])=>chip("cat:"+id,category===id,label)).join("")+'</div>'}
+function trayPieces(){return Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<button type="button" class="piece '+(Number(i)===sweet?'active-piece':'')+'" data-index="'+i+'" data-act="jump-sweet:'+i+'" aria-label="عرض '+esc(data.sweets[i].name)+'" aria-pressed="'+(Number(i)===sweet)+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></button>').join("");}
 function draw(){syncRoute();main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);const sequence=mode==="event"?[0,7,8,9,2,3,4,5,6]:[0,7,1,2,3,4,5,6];const progress=sequence.indexOf(step);document.getElementById("steps").innerHTML=sequence.map((_,i)=>'<i class="'+(i<=progress?"on":"")+'"></i>').join("");back.style.visibility=step&&step!==6?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
 if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب لاختيار الفرع أو اضغط على المحل</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';main.insertAdjacentHTML("beforeend",previousSelections());footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
 if(step===7){
@@ -489,7 +490,7 @@ if(step===9){
 if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار لتشوف باقي التشكيلات</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div><div class="buttonrow package-actions">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div></div></div>'+nav(box,data.boxes.length);footer.innerHTML=''}
 if(step===2){
  let q=amounts[sweet]||0;
- let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<button type="button" class="piece '+(Number(i)===sweet?'active-piece':'')+'" data-index="'+i+'" data-act="jump-sweet:'+i+'" aria-label="عرض '+esc(data.sweets[i].name)+'" aria-pressed="'+(Number(i)===sweet)+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></button>').join("");
+ let pieces=trayPieces();
  main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة ربع كيلو" '+(kg()+quantityStep>capacity()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint">'+fmt(kg())+' / '+fmt(mode==="event"?eventWeight():capacity())+' كيلو '+(mode==="event"?"مقترح":"")+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
  footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)
 }
@@ -584,7 +585,7 @@ function openRoute(path){
  step=safeStep(next);routeReplace=true;draw();
 }
 window.addEventListener("popstate",()=>{touched=true;openRoute(location.pathname);persist()});
-function baseAction(a){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
+function baseAction(a,render=true){touched=true;saved=false;if(a==="prev"||a==="next"){let d=a==="next"?1:-1;if(step===0)branch=wrap(branch+d,data.branches.length);if(step===1){box=wrap(box+d,data.boxes.length);amounts={}}if(step===2)sweet=wrap(sweet+d,data.sweets.length)}
 else if(step===0&&a.startsWith("resume:")){resumeSelection(a.slice(7))}
 else if(a==="continue"&&step===0&&data.branches[branch].open){selectionId=null;amounts={};mode="regular";category="all";order=null;orderState=0;proof=false;step=7;}
 else if(a==="regular"&&step===7){if(mode==="event")amounts={};mode="regular";category="all";slot="20 دقيقة";proof=false;step=1}
@@ -619,7 +620,7 @@ else if(a==="receipt"&&step===6){showReceipt();return}
 else if(a==="close-receipt"){document.getElementById("receipt-dialog").close();return}
 else if(a==="restart"){selectionId=null;step=0;branch=box=sweet=0;amounts={};fulfillment="pickup";slot="20 دقيقة";zone="المنطقة الأولى";payment="wallet";proof=false;order=null;orderState=0;mode="regular";category="all";resetEvent()}
 else if(a==="back"&&step>0&&step!==6){routeReplace=true;if(step===7)step=0;else if(step===8)step=7;else if(step===9)step=8;else if(step===1)step=7;else if(step===2&&mode==="event")step=9;else step--;}
-persist();draw()}
+persist();if(render)draw()}
 document.addEventListener("click",e=>{let el=e.target.closest("[data-act]");if(el&&!el.disabled)action(el.dataset.act)});back.addEventListener("click",()=>action("back"));document.addEventListener("keydown",e=>{if(e.target.matches('[role="button"][data-act]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();action(e.target.dataset.act)}else if(e.key==="ArrowLeft"&&step>0&&step<3)action("next");else if(e.key==="ArrowRight"&&step>0&&step<3)action("prev");else if(e.key==="ArrowUp"&&step===0)action("next");else if(e.key==="ArrowDown"&&step===0)action("prev")});
 
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)");
@@ -702,9 +703,10 @@ function paintSpring(){
    const front=Math.cos(angle),sine=Math.sin(angle),depth=(1-front)/2;
    const x=sine*w*.38+(s.items.length===2?depth*w*.24:0),y=(front*.23-.065)*h,z=-depth*240;
    const scale=1-depth*.47;
-   const visible=Math.abs(rel)<=2.35;
+   const edgeFade=clamp((2.35-Math.abs(rel))/.55,0,1);
+   const visible=edgeFade>.005;
    el.style.visibility=visible?"visible":"hidden";
-   el.style.opacity=(visible?1-depth*.62:0).toFixed(3);
+   el.style.opacity=((1-depth*.62)*edgeFade).toFixed(3);
    el.style.zIndex=String(Math.round(1000-depth*900));
    const nearby=visible&&front<.85;const tappable=s.step===2&&nearby;
    el.classList.toggle("sweet-neighbor",tappable);el.tabIndex=tappable?0:-1;
@@ -778,14 +780,31 @@ function animatePlateExchange(kind,oldQty,newQty){
  outgoing.animate([{transform:"translateX(0) scale(1)",opacity:1},{transform:"translateX("+(-dir*112)+"%) scale(.86)",opacity:0}],{duration:330,easing:"cubic-bezier(.42,0,.8,1)",fill:"both"});
  const arrive=incoming.animate([{transform:"translateX("+(dir*112)+"%) scale(.86)",opacity:0},{transform:"translateX(0) scale(1)",opacity:1}],{duration:370,delay:65,easing:"cubic-bezier(.2,.8,.25,1)",fill:"both"});
  arrive.onfinish=()=>{
-  if(!item.isConnected)return;
+  if(!item.isConnected||incoming.parentNode!==item)return;
   outgoing.remove();
   if(!backwards){item.innerHTML=servingArt(kind,newQty);return}
   // Hold the returning empty plate until the flying portion lands.
   const wait=incoming.animate([{opacity:1},{opacity:1}],{duration:320});
-  wait.onfinish=()=>{if(item.isConnected){item.innerHTML=servingArt(kind,newQty);item.firstElementChild?.animate([{opacity:.72},{opacity:1}],{duration:160})}};
+  wait.onfinish=()=>{if(item.isConnected&&incoming.parentNode===item){item.innerHTML=servingArt(kind,newQty);item.firstElementChild?.animate([{opacity:.72},{opacity:1}],{duration:160})}};
  };
  return true;
+}
+function refreshSweetQuantity(){
+ const q=amounts[sweet]||0,goal=mode==="event"?eventWeight():capacity(),tray=main.querySelector(".boxtray");
+ const scroll=tray.scrollLeft;
+ main.querySelector(".weight output").textContent=fmt(q)+" كيلو";
+ main.querySelector('[data-act="minus"]').disabled=q===0;
+ main.querySelector('[data-act="remove"]').disabled=q===0;
+ main.querySelector('[data-act="plus"]').disabled=kg()+quantityStep>capacity();
+ main.querySelector(".sweet-total").textContent=fmt(kg())+" / "+fmt(goal)+" كيلو "+(mode==="event"?"مقترح":"");
+ main.querySelector(".progress i").style.width=Math.min(100,kg()/goal*100)+"%";
+ tray.innerHTML=trayPieces()||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>';tray.scrollLeft=scroll;
+ const review=footer.querySelector('[data-act="review"]');review.disabled=kg()===0;review.querySelector(".orderbtn span:last-child").textContent=money(total());
+}
+function expandSweetWheel(s){
+ if(!s||reduceMotion.matches||!Element.prototype.animate)return;
+ s.expandAnimation?.cancel();
+ s.expandAnimation=s.layer.animate([{transform:"scale(1)"},{transform:"scale(1.10)",offset:.38},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.2,.72,.25,1)"});
 }
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
@@ -795,15 +814,27 @@ function action(a){
   const i=Number(a.slice(11)),index=sweetIndices().indexOf(i);
   if(index>=0&&(amounts[i]||0)>0){const n=scene.items.length;const target=index+Math.round((scene.k-index)/n)*n;scene.target=target;scene.velocity=0;if(reduceMotion.matches)commitSelection(target);else runSpring();return}
  }
- if(scene&&(scene.circular?wrap(Math.round(scene.target)%scene.items.length,scene.items.length):Math.round(scene.target))!==selected())commitSelection(scene.target);
+ const quantityAction=step===2&&["plus","minus","remove"].includes(a)&&!!scene;
+ if(quantityAction){
+  // Quantity controls belong to the displayed name, never to an unfinished swipe target.
+  if(raf)cancelAnimationFrame(raf);raf=0;lastTime=0;
+  const index=selected(),n=scene.items.length;
+  scene.k=scene.circular?index+Math.round((scene.k-index)/n)*n:index;scene.target=scene.k;scene.velocity=0;paintSpring();
+ }else if(scene&&(scene.circular?wrap(Math.round(scene.target)%scene.items.length,scene.items.length):Math.round(scene.target))!==selected())commitSelection(scene.target);
  const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null,oldQty=step===2?(amounts[sweet]||0):0;
  const beforePlate=step===2?scene?.els[selected()]?.getBoundingClientRect():null;
  const beforePiece=step===2?main.querySelector(".boxtray .piece[data-index='"+sweet+"']")?.getBoundingClientRect():null;
- baseAction(a);
+ baseAction(a,!quantityAction);
+ if(quantityAction){
+  refreshSweetQuantity();
+  // Keep the actual carousel DOM, angle and all neighboring plates intact.
+  const active=scene.els[selected()];if(active)active.innerHTML=servingArt(kind,amounts[sweet]||0);
+  if(a==="plus"&&kg()>old)expandSweetWheel(scene);
+ }
  const exchanged=step===2&&before===2&&["plus","minus","remove"].includes(a)?animatePlateExchange(kind,oldQty,amounts[sweet]||0):false;
  if(step===2&&before===2&&kg()>old&&a==="plus"){
   const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']");
-  if(target){flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
+  if(target){const tray=main.querySelector(".boxtray"),r=target.getBoundingClientRect(),t=tray.getBoundingClientRect();if(r.left<t.left||r.right>t.right)target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
  }
  if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[selected()]?.getBoundingClientRect(),kind,true,exchanged?160:0);
  if(before!==step&&!reduceMotion.matches){

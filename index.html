@@ -126,14 +126,47 @@ const wrap=(i,n)=>(i+n)%n, fmt=n=>Number(n.toFixed(2)).toString(), kg=()=>Object
 const money=n=>fmt(n)+" ₪", capacity=()=>data.boxes[box].capacity;
 function home(active){return '<svg viewBox="0 0 180 150" aria-hidden="true"><path d="M20 57 90 10 160 57" fill="#b38e63" stroke="#67482f" stroke-width="2"/><path d="M35 53h110v83H35z" fill="#f4e2c5" stroke="#8b6745" stroke-width="2"/><path d="M26 58 90 16 154 58z" fill="#d5b58a" stroke="#8b6745"/><path d="M45 65h90v17H45z" fill="#6f4b37"/><path d="M50 90h28v30H50zM102 90h28v30h-28z" fill="#cab79d" stroke="#8b6745"/><path d="M80 88h20v48H80z" fill="#8f6a4d"/><path d="M34 136h112" stroke="#8b6745" stroke-width="3"/><text x="90" y="77" text-anchor="middle" font-size="9" fill="#fff5dc">حلويات</text></svg>'}
 function boxArt(kind){if(kind==="plate")return '<svg viewBox="0 0 320 220" aria-hidden="true"><ellipse cx="160" cy="150" rx="131" ry="48" fill="#765c3b20"/><ellipse cx="160" cy="117" rx="135" ry="64" fill="#b9a78b"/><ellipse cx="160" cy="108" rx="135" ry="62" fill="#fff9ee" stroke="#9e865f" stroke-width="2"/><ellipse cx="160" cy="108" rx="99" ry="40" fill="#efe6d5" stroke="#ccbc9c"/></svg>';return '<svg viewBox="0 0 320 220" aria-hidden="true"><ellipse cx="160" cy="174" rx="131" ry="25" fill="#75543222"/><path d="M35 103 165 45 286 81 155 148z" fill="#e6cda5" stroke="#9f7a4b" stroke-width="2"/><path d="M35 103v35l120 51v-41z" fill="#bc9567" stroke="#9f7a4b" stroke-width="2"/><path d="M155 148v41l131-67V81z" fill="#a68055" stroke="#9f7a4b" stroke-width="2"/><path d="M35 96 165 38 286 74 155 141z" fill="#f6e5c9" stroke="#9f7a4b" stroke-width="2"/><path d="m55 95 109-48 104 31-113 54z" fill="none" stroke="#c0a275"/><path d="m35 96 120 45v9L35 105z" fill="#d4b58a"/><text x="160" y="98" fill="#80613f" font-size="18" font-family="Georgia" text-anchor="middle" transform="rotate(-7 160 98)">SWEETS</text></svg>'}
-function dessert(kind){let color=kind==="kunafa"?"#eeb541":kind==="arabic"?"#ae6e3a":kind==="baklava"?"#cb953f":"#dca450",dark=kind==="kunafa"?"#b5742e":"#995e30";let nuts=Array.from({length:40},(_,i)=>{let a=i*2.39996,r=Math.sqrt((i+1)/40),x=160+Math.cos(a)*101*r,y=93+Math.sin(a)*34*r;return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+(2+i%3)+'" ry="1.7" fill="'+(i%3===0?"#526034":"#a78541")+'" transform="rotate('+i*29+' '+x+' '+y+')"/>'}).join("");let cuts=kind==="kunafa"?"":'<path d="M65 78 235 109M55 98 216 127M106 60 93 123M157 56 145 132M208 62 196 130" stroke="#8b592e" stroke-width="1.7" opacity=".7"/>';return '<svg viewBox="0 0 320 174" aria-hidden="true"><ellipse cx="160" cy="145" rx="126" ry="22" fill="#76563824"/><ellipse cx="160" cy="119" rx="140" ry="48" fill="#cabda8"/><ellipse cx="160" cy="111" rx="140" ry="48" fill="#fffaf1" stroke="#b6a48a" stroke-width="1.5"/><path d="M43 93v19a117 42 0 0 0 234 0V93" fill="'+dark+'"/><ellipse cx="160" cy="93" rx="117" ry="42" fill="'+color+'" stroke="#a76d32"/><ellipse cx="160" cy="91" rx="108" ry="36" fill="#ffda75" opacity=".33"/>'+cuts+nuts+'</svg>'}
+
+/* Each illustrated tray represents 5 kg, in ten half-kilo portions. */
+const portionCount=10;
+function sweetColors(kind){return {top:kind==="kunafa"?"#eeb541":kind==="arabic"?"#ae6e3a":kind==="baklava"?"#cb953f":"#dca450",side:kind==="kunafa"?"#b5742e":"#995e30",cut:kind==="kunafa"?"#f9e4ae":kind==="arabic"?"#c89764":"#e7ba75"}}
+function portionAngles(i){let a=Math.PI/2-Math.PI/10+i*2*Math.PI/portionCount;return [a,a+2*Math.PI/portionCount]}
+function ellipsePoint(a){return [160+117*Math.cos(a),93+42*Math.sin(a)]}
+function coord(p){return p.map(v=>v.toFixed(2)).join(" ")}
+function down(p){return [p[0],p[1]+19]}
+function sliceTop(i){let [a,b]=portionAngles(i);return "M160 93 L"+coord(ellipsePoint(a))+" A117 42 0 0 1 "+coord(ellipsePoint(b))+" Z"}
+function pieceArt(kind){
+ const c=sweetColors(kind);
+ return '<svg viewBox="0 0 100 76" aria-hidden="true"><path d="M14 32L65 9 88 28 41 55 14 49Z" fill="'+c.side+'" stroke="#895326" stroke-width=".8"/><path d="M14 32 65 9 88 28 41 44Z" fill="'+c.top+'" stroke="#b17c39" stroke-width=".8"/><path d="M41 44 88 28 88 46 41 64Z" fill="'+c.cut+'" stroke="#a87b41" stroke-width=".8"/><path d="M41 44 88 28 88 32 41 48Z" fill="'+c.top+'"/><g fill="#63703b"><ellipse cx="53" cy="24" rx="3" ry="2"/><ellipse cx="62" cy="19" rx="2" ry="1.4"/><ellipse cx="46" cy="29" rx="2.5" ry="1.5"/><ellipse cx="65" cy="30" rx="2" ry="1.3"/></g></svg>'
+}
+function dessert(kind,removedKg=0){
+ const c=sweetColors(kind),missing=Math.min(portionCount,Math.max(0,Math.round(removedKg*2)));
+ const order=[0,1,9,2,8,3,7,4,6,5],gone=new Set(order.slice(0,missing));
+ const active=Array.from({length:portionCount},(_,i)=>i).filter(i=>!gone.has(i));
+ const sides=active.map(i=>{
+  let [a,b]=portionAngles(i),p=ellipsePoint(a),q=ellipsePoint(b),mid=(a+b)/2;
+  let result="";
+  if(Math.sin(mid)>0)result+='<path d="M'+coord(p)+' A117 42 0 0 1 '+coord(q)+' L'+coord(down(q))+' A117 42 0 0 0 '+coord(down(p))+' Z" fill="'+c.side+'" stroke="'+c.side+'" stroke-width=".6"/>';
+  if(gone.has((i+portionCount-1)%portionCount))result+='<path d="M160 93 L'+coord(p)+' L'+coord(down(p))+' L160 112 Z" fill="'+c.cut+'" stroke="'+c.side+'" stroke-width=".65"/>';
+  if(gone.has((i+1)%portionCount))result+='<path d="M160 93 L'+coord(q)+' L'+coord(down(q))+' L160 112 Z" fill="'+c.cut+'" stroke="'+c.side+'" stroke-width=".65"/>';
+  return result
+ }).join("");
+ const tops=active.map(i=>'<path d="'+sliceTop(i)+'" fill="'+c.top+'" stroke="'+(kind==="kunafa"?c.top:"#a36a32")+'" stroke-width="'+(kind==="kunafa"?".8":".65")+'"/>').join("");
+ const nuts=Array.from({length:55},(_,i)=>{
+  let a=i*2.39996,r=Math.sqrt((i+1)/55),x=160+Math.cos(a)*101*r,y=93+Math.sin(a)*34*r;
+  const norm=((Math.atan2((y-93)/42,(x-160)/117)-(Math.PI/2-Math.PI/10))%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+  if(gone.has(Math.floor(norm/(Math.PI*2/portionCount))))return "";
+  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+(1.4+i%3)+'" ry="1.5" fill="'+(i%3===0?"#526034":"#a78541")+'" transform="rotate('+i*29+' '+x+' '+y+')"/>'
+ }).join("");
+ return '<svg viewBox="0 0 320 174" aria-hidden="true"><ellipse cx="160" cy="145" rx="126" ry="22" fill="#76563824"/><ellipse cx="160" cy="119" rx="140" ry="48" fill="#cabda8"/><ellipse cx="160" cy="111" rx="140" ry="48" fill="#fffaf1" stroke="#b6a48a" stroke-width="1.5"/><ellipse cx="160" cy="111" rx="119" ry="38" fill="none" stroke="#e0d1b8" stroke-width="1"/>'+sides+tops+nuts+'</svg>'
+}
 function dots(n,i){return '<div class="dots">'+Array.from({length:n},(_,k)=>'<span class="'+(i===k?"on":"")+'"></span>').join("")+'</div>'}
 function nav(i,n){return '<div class="nav"><button class="round" data-act="prev" aria-label="السابق">‹</button>'+dots(n,i)+'<button class="round" data-act="next" aria-label="التالي">›</button></div>'}
 function primary(label,act,disabled=false){return '<button class="primary" data-act="'+act+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
 function draw(){main.dataset.step=String(step);document.querySelector(".app").dataset.step=String(step);document.getElementById("steps").innerHTML=[0,1,2,3].map(i=>'<i class="'+(i<=step?"on":"")+'"></i>').join("");back.style.visibility=step?"visible":"hidden";let b=data.branches[branch], bx=data.boxes[box], s=data.sweets[sweet];
 if(step===0){let houses=[-1,0,1].map(d=>{let x=data.branches[wrap(branch+d,data.branches.length)];return '<div class="house '+(d===0?'active':d<0?'prev':'next')+'" '+(d?'data-act="'+(d<0?'prev':'next')+'" role="button" tabindex="0"':'')+'>'+home(d===0)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?'open':'closed')+'">'+(x.open?'مفتوح':'مغلق')+'</span><small>'+esc(x.note)+'</small></div>'}).join("");main.innerHTML='<div class="center"><div class="eyebrow">٠١ — اختر الفرع</div><h1>من وين بتحب نجهّز طلبك؟</h1><p class="hint">اسحب للأعلى أو للأسفل لاختيار الفرع</p></div><div class="stage roadstage" data-swipe="vertical"><svg class="road" viewBox="0 0 360 410" preserveAspectRatio="none"><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#dfc9a7" stroke-width="34"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#fbf0d8" stroke-width="25"/><path d="M74 0 C290 55 338 86 164 167 S17 236 212 302 265 373 93 410" fill="none" stroke="#bc9d73" stroke-width="1.2" stroke-dasharray="6 7"/></svg>'+houses+'<div class="arrow-stack"><button class="round" data-act="prev" aria-label="فرع سابق">↑</button><button class="round" data-act="next" aria-label="فرع تالي">↓</button></div></div>';footer.innerHTML=primary(b.open?'اختيار الفرع':'الفرع مغلق حالياً','continue',!b.open)}
 if(step===1){main.innerHTML='<div class="center"><div class="eyebrow">٠٢ — اختر البوكس</div><h1>ضيافتك على ذوقك</h1><p class="hint">'+esc(b.name)+' · اسحب يميناً أو يساراً</p></div><div class="stage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+boxArt(data.boxes[wrap(box-1,data.boxes.length)].kind)+'</div><div class="hero">'+boxArt(bx.kind)+'</div><div class="neighbor next">'+boxArt(data.boxes[wrap(box+1,data.boxes.length)].kind)+'</div></div></div>'+nav(box,data.boxes.length)+'<div class="center"><h2>'+esc(bx.name)+'</h2><p class="hint">يكفي تقريباً '+fmt(bx.capacity)+' كيلو حلويات</p></div>';footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
-if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+dessert(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">٠٣ — شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+nav(sweet,data.sweets.length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(capacity())+' كيلو</div><div class="progress"><i style="width:'+Math.min(100,kg()/capacity()*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
+if(step===2){let q=amounts[sweet]||0;let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="piece" data-index="'+i+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></div>').join("");main.innerHTML='<div class="center"><div class="eyebrow">٠٣ — شكّل البوكس</div><h2 style="margin-top:8px">'+esc(s.name)+'</h2><p class="hint">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p></div>'+nav(sweet,data.sweets.length)+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص نصف كيلو" '+(!q?'disabled':'')+'>−</button><output>'+fmt(q)+' كيلو</output><button data-act="plus" aria-label="إضافة نصف كيلو" '+(kg()+.5>capacity()?'disabled':'')+'>+</button></div><div class="center hint">'+fmt(kg())+' / '+fmt(capacity())+' كيلو</div><div class="progress"><i style="width:'+Math.min(100,kg()/capacity()*100)+'%"></i></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"><div class="neighbor prev">'+dessert(data.sweets[wrap(sweet-1,data.sweets.length)].kind)+'</div><div class="hero">'+dessert(s.kind)+'</div><div class="neighbor next">'+dessert(data.sweets[wrap(sweet+1,data.sweets.length)].kind)+'</div></div></div><div class="traylabel"><b>'+esc(bx.name)+'</b><span>تشكيلتك</span></div><div class="boxtray">'+(pieces||'<div class="empty">أضف الحلو من الزر + لتعبئة البوكس</div>')+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)}
 if(step===3){main.innerHTML='<div class="center"><div class="eyebrow">٠٤ — مراجعة الطلب</div><h1>بوكس على ذوقك ✦</h1><p class="hint">'+esc(b.name)+' · '+esc(bx.name)+'</p></div><div class="review-art">'+boxArt(bx.kind)+'</div><div class="summary">'+Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<div class="summaryrow"><span>'+esc(data.sweets[i].name)+' · '+fmt(v)+' كغ</span><b>'+money(data.sweets[i].price*v)+'</b></div>').join("")+'<div class="summaryrow"><span>الوزن الكلي</span><b>'+fmt(kg())+' كغ</b></div><div class="summaryrow"><b>المجموع</b><span class="bigprice">'+money(total())+'</span></div></div><div class="notice">هذا نموذج تجريبي. الفروع والأسعار افتراضية ولا يتم إرسال طلب حقيقي أو تحصيل أي دفعة.</div>';footer.innerHTML=primary(saved?'تم حفظ التشكيلة ✓':'احفظ تشكيلتك','save')+'<button class="secondary" style="margin-top:9px" data-act="restart">ابدأ من جديد</button>'}
 footer.insertAdjacentHTML("beforeend",'<div class="footnote"><a href="https://yoosal.net" target="_blank" rel="noopener">تطوير وكالة يوصل · YOOSAL</a></div>');mountSpring()}
 function persist(){try{localStorage.setItem("sweettest:v1",JSON.stringify({branch,box,sweet,amounts}))}catch{}}
@@ -172,7 +205,7 @@ function mountSpring(){
  }else{
   layer=stage.querySelector(".carousel");layer.className="spring-carousel";
  }
- layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind))+'</div>').join("");
+ layer.innerHTML=items.map((x,i)=>vertical?'<div class="spring-house" data-index="'+i+'">'+home(i===k)+'<strong>'+esc(x.name)+'</strong><span class="'+(x.open?"open":"closed")+'">'+(x.open?"مفتوح":"مغلق")+'</span><small>'+esc(x.note)+'</small></div>':'<div class="spring-item" data-index="'+i+'">'+(step===1?boxArt(x.kind):dessert(x.kind,amounts[i]||0))+'</div>').join("");
  scene={stage,layer,path,vertical,items,els:[...layer.children],k,target:k,velocity:0,step};
  paintSpring();
 }
@@ -231,27 +264,30 @@ function navigate(delta){
  if(next!==s.target)s.velocity=delta*.12;
  runSpring();
 }
-function flySweet(source){
- if(reduceMotion.matches||!source)return;
- const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']")||main.querySelector(".boxtray .piece:last-child");
- if(!target)return;
- const to=target.getBoundingClientRect();
- const el=document.createElement("div");el.className="fly-sweet";el.innerHTML=dessert(data.sweets[sweet].kind);
- const w=source.width*.48,h=source.height*.48,x=source.left+(source.width-w)/2,y=source.top+(source.height-h)/2;
- Object.assign(el.style,{left:x+"px",top:y+"px",width:w+"px",height:h+"px"});document.body.appendChild(el);
- const dx=to.left+to.width/2-x-w/2,dy=to.top+to.height/2-y-h/2;
- const anim=el.animate([{transform:"translate3d(0,0,0) scale(1)",opacity:1},{transform:"translate3d("+dx*.32+"px,"+(dy*.18-14)+"px,0) scale(.86)",opacity:1,offset:.28},{transform:"translate3d("+dx+"px,"+dy+"px,0) scale(.35)",opacity:.15}],{duration:620,easing:"cubic-bezier(.22,.65,.3,1)"});
+
+function flySweet(source,target,kind,reverse=false){
+ if(reduceMotion.matches||!source||!target||!Element.prototype.animate)return;
+ const el=document.createElement("div");el.className="fly-sweet";el.innerHTML=pieceArt(kind);
+ const w=Math.max(35,Math.min(94,source.width*.5)),height=w*.76;
+ const x=source.left+source.width/2-w/2,y=source.top+source.height*.58-height/2;
+ Object.assign(el.style,{left:x+"px",top:y+"px",width:w+"px",height:height+"px"});document.body.appendChild(el);
+ const dx=target.left+target.width/2-x-w/2,dy=target.top+target.height*(reverse?.56:.5)-y-height/2;
+ const anim=el.animate([{transform:"translate3d(0,0,0) scale(.8)",opacity:1},{transform:"translate3d("+dx*.32+"px,"+(dy*.18-18)+"px,0) scale(1)",opacity:1,offset:.25},{transform:"translate3d("+dx+"px,"+dy+"px,0) scale(.48)",opacity:.15}],{duration:590,easing:"cubic-bezier(.22,.65,.3,1)"});
  const remove=()=>el.remove();anim.onfinish=remove;anim.oncancel=remove;
- target.classList.add("arrive");
 }
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
  if(pointer)return;
  if(scene&&Math.round(scene.target)!==selected())commitSelection(scene.target);
- const from=a==="plus"&&step===2&&kg()+.5<=capacity()&&scene?scene.els[sweet]?.getBoundingClientRect():null;
- const before=step,old=kg();
+ const before=step,old=kg(),kind=step===2?data.sweets[sweet].kind:null;
+ const beforePlate=step===2?scene?.els[sweet]?.getBoundingClientRect():null;
+ const beforePiece=step===2?main.querySelector(".boxtray .piece[data-index='"+sweet+"']")?.getBoundingClientRect():null;
  baseAction(a);
- if(from&&kg()>old)flySweet(from);
+ if(step===2&&before===2&&kg()>old&&a==="plus"){
+  const target=main.querySelector(".boxtray .piece[data-index='"+sweet+"']");
+  if(target){flySweet(beforePlate,target.getBoundingClientRect(),kind);target.classList.add("arrive")}
+ }
+ if(step===2&&before===2&&kg()<old&&(a==="minus"||a==="remove"))flySweet(beforePiece,scene?.els[sweet]?.getBoundingClientRect(),kind,true);
  if(before!==step&&!reduceMotion.matches){
   main.animate([{opacity:0,transform:"translateY("+(step>before?14:-14)+"px)"},{opacity:1,transform:"translateY(0)"}],{duration:310,easing:"cubic-bezier(.2,.8,.2,1)"});
  }

@@ -390,6 +390,13 @@ main[data-step="3"]>.summary{min-height:0;overflow-y:auto;touch-action:pan-y}
 .roadstage .branch-photo{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 5px #573a2022);user-select:none;pointer-events:none}
 .roadstage .spring-house:has(.branch-photo){width:clamp(150px,53vw,224px)}
 .roadstage .spring-house.is-selected .branch-photo{filter:drop-shadow(0 7px 7px #79563833)}
+
+/* Photo layers are individually clipped; the plate never loses pixels as food is removed. */
+.reference-art .reference-photos{opacity:0}
+.reference-art.photos-ready .reference-photos{opacity:1}
+.reference-art.photos-ready .reference-fallback{visibility:hidden}
+.reference-art svg{filter:none!important}
+.reference-art image{pointer-events:none}
 </style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><header class="mascot-header" id="mascot-header" data-mood="happy"><button class="mascot-button" id="mascot-button" type="button" aria-label="احكي مع لوزة"><svg viewBox="0 0 94 88" aria-hidden="true"><g stroke="#70482f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 58Q12 58 10 46M67 57Q81 55 83 42M10 46l-4-5m4 5 4-7m69 3 4-5m-4 5-4-6M30 69l-5 10h-8m43-10 5 10h8" fill="none"/><path d="M45 9Q49 7 53 11L80 36Q84 40 80 46L53 73Q49 77 44 74L14 47Q10 43 14 38Z" fill="#c48a46"/><path d="M45 4Q49 2 53 6L80 32Q84 36 80 42L52 67Q48 71 43 67L14 40Q10 36 14 32Z" fill="#efc67c"/><path d="M19 42L44 65 49 68 76 44M20 48l24 22m29-23L51 70" fill="none" stroke="#aa733e" stroke-width="1.2"/><path d="M23 30L44 11m15 3 13 14M27 48l10 10" fill="none" stroke="#fff0c6" stroke-width="2"/><path d="M40 13q8-8 16-1-1 7-8 9-6-1-8-8Z" fill="#849348"/></g><g fill="#70482f" class="mascot-eyes"><ellipse cx="34" cy="34" rx="3.5" ry="5"/><ellipse cx="60" cy="34" rx="3.5" ry="5"/></g><g fill="#d78f72" opacity=".75"><ellipse cx="27" cy="43" rx="5" ry="2.5"/><ellipse cx="67" cy="43" rx="5" ry="2.5"/></g><path class="mascot-mouth" d="M40 44Q47 51 54 44" fill="none" stroke="#70482f" stroke-width="2.6" stroke-linecap="round"/><path class="mascot-spark" d="M83 11v10m-5-5h10M8 15v7m-3.5-3.5h7" fill="none" stroke="#b68b43" stroke-width="2" stroke-linecap="round"/></svg></button><div class="mascot-bubble"><span class="mascot-name">لوزة</span><span id="mascot-speech" role="status" aria-live="polite">يا هلا بالحلوين!</span></div></header><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog><div class="loading-screen" id="loading-screen" role="status" aria-live="polite"><div class="loading-art" id="loading-art"></div><div class="eyebrow">لحظة حلوة</div><h1>بنجهّزلك الحلا</h1><p>ثواني وبتبدأ تجربتك</p><div class="loading-track"><i></i></div></div></div>
 <script>
 const lastBranchKey="sweettest:dahab:last-branch:v1";
@@ -467,7 +474,7 @@ function standardBoxArt(kind){
  return '<svg viewBox="0 0 320 220" aria-hidden="true">'+defs+'<ellipse cx="160" cy="183" rx="145" ry="28" fill="'+paint(id+"shadow")+'"/><g '+(small?'transform="translate(33 15) scale(.8 .88)"':'')+'><path d="M29 95 171 43 292 78 151 143Z" fill="#cfad7e"/><path d="M29 95V143L151 194V143Z" fill="'+paint(id+"side")+'" stroke="#9d754d" stroke-width="1"/><path d="M151 143 292 78V126L151 194Z" fill="#997047" stroke="#805b3d" stroke-width="1"/><path d="M27 91 169 34 294 71 152 137Z" fill="'+paint(id+"paper")+'" stroke="#a88251" stroke-width="1"/><path d="M27 91 152 137V149L27 103Z" fill="#d4b68a"/><path d="M152 137 294 71V83L152 149Z" fill="#b18d60"/><path d="M46 92 170 43 276 75 152 129Z" fill="none" stroke="#b89965" stroke-width="1.3"/><path d="M46 92 152 129" stroke="#fff8e7" stroke-width="1.2"/><path d="M110 57 134 48 256 89 233 100Z" fill="'+paint(id+"ribbon")+'" opacity=".92"/><path d="M233 100 256 89V147L233 158Z" fill="#b38b51"/><path d="M83 115 225 53 248 60 105 124Z" fill="'+paint(id+"ribbon")+'" opacity=".92"/><path d="M83 115 105 124V174L83 165Z" fill="#b28a51"/><g transform="translate(158 87) rotate(-15)"><ellipse rx="37" ry="19" fill="#62442d" stroke="#efce8e" stroke-width="1.5"/><ellipse rx="33" ry="15.5" fill="none" stroke="#bd9457" stroke-width=".7"/><text y="4" text-anchor="middle" fill="#f8dfac" font-size="12" font-family="Georgia,serif">SWEETS</text><path d="M-5 -11 0 -15 5 -11 0 -8Z" fill="#dfb56f"/></g><path d="M32 110 149 155V188" fill="none" stroke="#efcf9e" stroke-width="1" opacity=".65"/></g></svg>'
 }
 
-function boxArt(kind){
+function illustratedBoxArt(kind){
  if(!["mini","gift","tray","tin","long"].includes(kind))return standardBoxArt(kind);
  const id=uid();
  const defs='<defs>'+gradient(id+"gold",["#fae6b2","#c09859","#846138"])+gradient(id+"paper",["#fff2d4","#e4c59c","#b98e61"])+gradient(id+"dark",["#8a6140","#5b3827","#38251d"])+radial(id+"shadow",["#63452455","#63452400"])+'</defs>';
@@ -477,6 +484,64 @@ function boxArt(kind){
  const mini=kind==="mini",gift=kind==="gift",long=kind==="long";
  return frame('<g '+(mini?'transform="translate(54 39) scale(.66)"':long?'transform="translate(0 23) scale(1 .84)"':'')+'><path d="M29 93 168 38 291 78 150 145Z" fill="'+paint(id+"paper")+'" stroke="#a77c4d"/><path d="M29 93V142L150 188V145Z" fill="'+(gift?"#a77452":"#c1a078")+'"/><path d="M150 145 291 78V126L150 188Z" fill="'+(gift?"#79503b":"#94724c")+'"/><path d="M29 91 168 34 291 74 150 139Z" fill="'+(gift?paint(id+"dark"):paint(id+"paper"))+'" stroke="#a07a50"/><path d="M43 91 168 42 277 76 150 131Z" fill="none" stroke="#d6b77f" stroke-width="1.4"/>'+(gift?'<path d="M101 62 126 52 250 92 228 102Z" fill="'+paint(id+"gold")+'"/><path d="M81 112 223 52 246 59 103 120Z" fill="'+paint(id+"gold")+'"/><path d="M153 83Q108 32 132 38Q153 41 160 81Q196 38 216 57Q226 73 166 85" fill="none" stroke="#e0bd79" stroke-width="8" stroke-linecap="round"/>':'')+'<g transform="translate(160 87) rotate(-13)"><ellipse rx="42" ry="19" fill="'+(gift?"#e4c58c":"#6c4c31")+'" stroke="#b68e51"/><text text-anchor="middle" y="4" font-size="13" font-family="Georgia" fill="'+(gift?"#553522":"#f6dbab")+'">'+(mini?"PETIT":gift?"GIFT":"GATHER")+'</text></g></g>');
 }
+/* Photographic demo references: supplier imagery, not verified Dahab products.
+   Replace these URLs with approved local transparent WebP assets before a commercial launch. */
+const goldPlateReference={url:"https://cdn.cimri.io/image/1200x1200/selim-victoria-altin-yuvarlak-tepsi_720106005.jpg",crop:"19 160 484 180",outline:"M24 250 C24 145 493 145 498 250 L498 272 C498 356 24 356 24 272 Z"};
+const squareBoxReference={url:"https://hotpack.com.sa/cdn/shop/products/HSMSBAGW2020_2_48f6af5b-9035-4077-bad9-a5ce57d541a8_533x.jpg?v=1661769246",crop:"43 155 427 200",outline:"M48 191 L307 162 L465 234 L461 294 L168 349 L48 271 Z"};
+const longBoxReference={url:"https://hotpack.om/cdn/shop/files/HSMSBAGW2010_2_0ae881b6-d1f6-4acd-af73-ca069c20efa7.jpg?v=1687415463",crop:"60 158 394 194",outline:"M66 214 L361 165 L447 221 L443 280 L134 346 L68 272 Z"};
+const packagePhotoReferences={
+ box:{...squareBoxReference,rect:[14,32,292,155]},small:{...squareBoxReference,rect:[48,52,224,125]},mini:{...longBoxReference,rect:[78,62,164,102]},long:{...longBoxReference,rect:[10,34,300,153]},
+ gift:{url:"https://www.tahtakaletoptancilari.com/image/cache/catalog/urunler/image/data/urunler/karton-cikolata-kutusu-16-li-seperator-altin1-1100x1100.jpg",crop:"98 67 324 369",outline:"M107 314 L220 252 L221 78 L410 86 L383 265 L278 423 Z",rect:[54,10,212,199]},
+ tray:{url:"https://www.homesrus.ae/media/catalog/product/5/1/5110501701872_2.jpg?bg-color=255%2C255%2C255&canvas=840%3A840&fit=bounds&height=840&quality=80&width=840",crop:"20 170 475 176",outline:"M24 255 L62 250 L61 230 Q60 212 90 207 L376 177 Q405 171 429 203 L456 194 Q466 193 486 217 L451 240 L474 260 Q487 276 451 286 L114 336 Q85 341 71 301 L27 287 Z",rect:[10,45,300,137]},
+ plate:{...goldPlateReference,rect:[10,44,300,132]},
+ tin:{url:"https://www.unicorsa.com/cdn/shop/files/CAJA-METALICA-141X55-DORADO_38164668-9582-4c2c-ac06-70e548622f1b.jpg?v=1776440443",crop:"24 93 472 334",outline:"M29 212 C29 57 486 57 487 212 L479 330 C479 448 40 448 40 330 Z",rect:[12,12,296,195]}
+};
+const sweetPhotoReferences={
+ kunafa:{url:"https://cdn.zalatimo.com/ex-zalatimo-new/3277/0d3875cb1923e0e6942a149fc00632089e8f5023.png",crop:"55 55 402 402",round:true},
+ basbousa:{url:"https://cdn.salla.sa/pQGOGp/aedc75ef-20c0-4356-a529-c24e4d31e506-1000x1000-CxJJaahPrN4XBdHR4xkn8RF3USd6Yi1PfzAN1HJF.png",crop:"132 125 245 244"},
+ baklava:{url:"https://bashafoodservice.ca/cdn/shop/products/BaklavaMediumTray_1200x1200.png?v=1680054721",crop:"31 89 448 334"},
+ walnut:{url:"https://www.celebiogullari.com.tr/UserFiles/Fotograflar/org/1893-cevizli-baklava-3-100-gr-tepsi-miktar-cevizli-baklava.jpg",crop:"83 67 404 404",round:true},
+ nest:{url:"https://rawaastreetsweets.com/cdn/shop/files/RawaaStreetSweetsBaklavasLargeTrays.png?v=1730330812&width=1946",crop:"30 98 454 310"},
+ roll:{url:"https://tryaladdin.com/cdn/shop/products/asi-kunefeleri-pistachio-sarma-baklava-tray-234650.jpg?v=1735489414&width=1500",crop:"149 105 350 300"},
+ pistachiocookie:{url:"https://charismagoods.com/cdn/shop/products/EAS03839.png?v=1678353712&width=1780",crop:"90 165 355 248",outline:"M103 284 L233 164 L435 253 L291 412 Z"},
+ coconut:{url:"https://cdn.elabdfoods.com/abdproimages-blob/0000948_-_550.png",crop:"54 180 403 150"},
+ chocolate:{url:"https://www.kozalbaklava.ae/cdn/shop/files/Chocolatebaklava_2.png?v=1761652938&width=533",crop:"64 115 384 284"}
+};
+function referenceImageLoaded(el){
+ const root=el.closest("svg.reference-art");if(!root)return;
+ el.setAttribute("data-ready","1");
+ if([...root.querySelectorAll("image[data-reference]")].every(x=>x.getAttribute("data-ready")==="1"))root.classList.add("photos-ready");
+}
+function photoLayer(ref,rect){
+ const id=uid(),[x,y,w,h]=rect;
+ return '<svg x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" viewBox="'+ref.crop+'" preserveAspectRatio="none" overflow="hidden">'+(ref.outline?'<defs><clipPath id="'+id+'"><path d="'+ref.outline+'"/></clipPath></defs><g clip-path="url(#'+id+')">':'')+'<image href="'+esc(ref.url)+'" x="0" y="0" width="512" height="512" preserveAspectRatio="none" data-reference="1" onload="referenceImageLoaded(this)"/>'+(ref.outline?'</g>':'')+'</svg>';
+}
+function referenceArt(fallback,photo,height){
+ return '<svg class="reference-art" viewBox="0 0 320 '+height+'" aria-hidden="true"><g class="reference-fallback">'+fallback+'</g><g class="reference-photos">'+photo+'</g></svg>';
+}
+function foodMask(kind,removed){
+ const ref=sweetPhotoReferences[kind];const fraction=clamp(removed/servingCapacity,0,1);
+ if(fraction>=1)return "";
+ if(ref.round){
+  const cx=160,cy=93,rx=116,ry=43,pt=a=>(cx+rx*Math.cos(a)).toFixed(2)+" "+(cy+ry*Math.sin(a)).toFixed(2);
+  if(fraction===0)return '<ellipse cx="160" cy="93" rx="116" ry="43"/>';
+  const a=Math.PI/2+2*Math.PI*fraction,b=Math.PI/2+2*Math.PI;
+  return '<path d="M160 93 L'+pt(a)+' A116 43 0 '+(1-fraction>.5?1:0)+' 1 '+pt(b)+' Z"/>';
+ }
+ const left=63,top=63,cw=194/5,ch=72/4,removedCells=fraction*20;
+ return Array.from({length:20},(_,i)=>{
+  const remaining=clamp(20-removedCells-i,0,1);if(!remaining)return "";
+  return '<rect x="'+(left+(i%5)*cw)+'" y="'+(top+Math.floor(i/5)*ch)+'" width="'+(cw*remaining).toFixed(3)+'" height="'+ch+'"/>';
+ }).join("");
+}
+function photoDessert(kind,removed){
+ const ref=sweetPhotoReferences[kind];if(!ref)return illustratedDessert(kind,removed);
+ const plate=photoLayer(goldPlateReference,[9,55,302,104]),mask=foodMask(kind,removed),id=uid();
+ const food=mask?'<defs><clipPath id="'+id+'">'+mask+'</clipPath></defs><g clip-path="url(#'+id+')">'+photoLayer(ref,ref.round?[44,50,232,86]:[63,63,194,72])+'</g>':"";
+ return referenceArt(illustratedDessert(kind,removed),plate+food,174);
+}
+
+function boxArt(kind){const fallback=illustratedBoxArt(kind),ref=packagePhotoReferences[kind];return ref?referenceArt(fallback,photoLayer(ref,ref.rect),220):fallback}
 const portionCount=20;
 const quantityStep=.25;
 const remainingKg=()=>Math.max(0,roundKg(capacity()-kg()));
@@ -521,7 +586,8 @@ function individualSweet(kind,id,c,i){
  if(kind==="datecookie"||kind==="pistachiocookie"||kind==="ghraybeh")return base+'<ellipse cy="3" rx="16" ry="10" fill="'+side+'"/><ellipse cy="-2" rx="16" ry="11" fill="'+top+'"/>'+Array.from({length:10},(_,j)=>{let a=j*Math.PI/5;return '<path d="M'+(Math.cos(a)*7).toFixed(2)+' '+(Math.sin(a)*5-2).toFixed(2)+'L'+(Math.cos(a)*14).toFixed(2)+' '+(Math.sin(a)*9-2).toFixed(2)+'" stroke="'+c.side+'" stroke-width=".9" opacity=".75"/>'}).join("")+'<ellipse cy="-2" rx="4" ry="3" fill="'+(kind==="pistachiocookie"?"#809445":kind==="datecookie"?"#81522b":"#f6eed8")+'"/>';
  return base+'<ellipse cy="1" rx="15" ry="12" fill="'+side+'"/><ellipse cy="-3" rx="15" ry="12" fill="'+top+'"/>'+Array.from({length:18},(_,j)=>{const a=j*2.39996,r=Math.sqrt((j+.5)/18);return '<ellipse cx="'+(Math.cos(a)*13*r).toFixed(2)+'" cy="'+(Math.sin(a)*10*r-3).toFixed(2)+'" rx="1.2" ry=".65" fill="'+(kind==="coconut"?"#fff4d7":j%2?"#d0a46b":"#37251c")+'"/>'}).join("");
 }
-function dessert(kind,removedKg=0){
+function dessert(kind,removedKg=0){return photoDessert(kind,removedKg)}
+function illustratedDessert(kind,removedKg=0){
  const id=uid(),c=sweetColors(kind),missing=Math.min(portionCount,Math.max(0,Math.round(removedKg/quantityStep)));
  const round=roundKinds.includes(kind),order=round?Array.from({length:portionCount},(_,i)=>i%2===0?(portionCount-Math.floor(i/2))%portionCount:Math.ceil(i/2)):Array.from({length:portionCount},(_,i)=>portionCount-1-i),gone=new Set(order.slice(0,missing));
  const active=Array.from({length:portionCount},(_,i)=>i).filter(i=>!gone.has(i));
@@ -707,11 +773,11 @@ if(step===9){
  main.innerHTML='<div class="center"><div class="eyebrow">ضيافة على قد المناسبة</div><h1>هيك بتكفي كل ضيوفك</h1><p class="hint">'+esc(eventLabel())+'</p></div><div class="event-hero">'+boxArt("box")+'</div><div class="summary"><div class="summaryrow"><span>عدد الضيوف</span><b>'+guests+'</b></div><div class="summaryrow"><span>الكمية المقترحة</span><b>'+fmt(estimate)+' كيلو</b></div><div class="summaryrow"><span>سعر تقريبي</span><b>حوالي '+money(Math.round(estimate*avg))+'</b></div></div><div class="notice">اقتراح تجريبي على أساس 150 غرام لكل ضيف، قابل للتعديل حسب ذوقك. السعر النهائي حسب الأصناف المختارة.</div>';
  footer.innerHTML=primary("اعتمد التشكيلة المقترحة","event-preset")+'<button class="secondary checkout-secondary" data-act="event-custom">بدي أشكّل الضيافة بنفسي</button>';
 }
-if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار لتشوف باقي التشكيلات</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div><div class="buttonrow package-actions">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div></div></div>'+nav(box,data.boxes.length);footer.innerHTML=''}
+if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار · صور مرجعية للتجربة</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div><div class="buttonrow package-actions">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div></div></div>'+nav(box,data.boxes.length);footer.innerHTML=''}
 if(step===2){
  let q=amounts[sweet]||0;
  let pieces=trayPieces();
- main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><label class="weight-entry"><input id="sweet-weight" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="الكمية بالكيلو" value="'+fmt(q)+'"><span>كيلو</span></label><button data-act="plus" aria-label="إضافة ربع كيلو" '+(boxFull()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint '+(boxFull()?"full":"")+'" role="status" aria-live="polite">'+sweetTotalLabel()+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray" data-package="'+esc(basketPackageKind())+'">'+basketContents()+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
+ main.innerHTML='<div class="center sweet-heading"><div class="eyebrow">شكّل البوكس · صور مرجعية</div></div><div class="stage dessertstage" data-swipe="horizontal"><div class="carousel"></div></div><div class="sweet-controls"><div class="sweet-details center" data-swipe="horizontal"><div class="sweet-title-row"><button class="round" data-act="prev" aria-label="الحلو السابق">‹</button><h2 class="sweet-name">'+esc(s.name)+'</h2><button class="round" data-act="next" aria-label="الحلو التالي">›</button></div><p class="hint sweet-description">'+esc(s.desc)+' · '+money(s.price)+' / كيلو</p>'+dots(catalog().length,selected())+'</div>'+categoryBar()+'<div class="weight"><button data-act="remove" aria-label="حذف النوع" '+(!q?'disabled':'')+'>×</button><button data-act="minus" aria-label="إنقاص ربع كيلو" '+(!q?'disabled':'')+'>−</button><label class="weight-entry"><input id="sweet-weight" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="الكمية بالكيلو" value="'+fmt(q)+'"><span>كيلو</span></label><button data-act="plus" aria-label="إضافة ربع كيلو" '+(boxFull()?'disabled':'')+'>+</button></div></div><div class="sweet-total center hint '+(boxFull()?"full":"")+'" role="status" aria-live="polite">'+sweetTotalLabel()+'</div><div class="progress"><i style="width:'+Math.min(100,kg()/(mode==="event"?eventWeight():capacity())*100)+'%"></i></div><div class="traylabel"><b>'+esc(mode==="event"?"ضيافة المناسبة":bx.name)+'</b><span>اضغط على الحلو لتعديله</span></div><div class="boxtray" data-package="'+esc(basketPackageKind())+'">'+basketContents()+'</div><p class="hint center saved">تُحفظ تشكيلتك تلقائياً على هذا الجهاز</p>';
  footer.innerHTML=primary('<span class="orderbtn"><span>اطلب البوكس</span><span>'+money(total())+'</span></span>','review',kg()===0)
 }
 

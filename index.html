@@ -277,7 +277,16 @@ body{font-family:"Thmanyah UI","IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
  main[data-step="2"]>.boxtray{grid-column:2;grid-row:5;height:clamp(49px,16dvh,83px)}
  main[data-step="2"]>.saved{display:none}
 }
-.dessertstage .spring-item.sweet-neighbor{pointer-events:auto;cursor:pointer}.dessertstage .spring-item.sweet-neighbor:focus-visible{outline:2px solid #a47b45;outline-offset:4px;border-radius:50%}</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
+.dessertstage .spring-item.sweet-neighbor{pointer-events:auto;cursor:pointer}.dessertstage .spring-item.sweet-neighbor:focus-visible{outline:2px solid #a47b45;outline-offset:4px;border-radius:50%}
+/* Keep package actions directly below the selected item's description. */
+.package-info{width:min(94%,390px);gap:4px}
+.package-info .package-actions{width:100%;margin-top:5px;pointer-events:auto}
+.package-actions .primary,.package-actions .secondary{min-width:0;flex:1;min-height:42px;padding:8px 5px;font-size:clamp(12px,3.5vw,15px)}
+.app[data-step="1"] .footer{border-top:0;box-shadow:none;padding-top:2px;background:transparent}
+main[data-step="2"] .sweet-name{font-size:clamp(20px,5.8vw,27px)}
+@media(max-height:570px){.package-info{gap:2px}.package-info .package-actions{margin-top:3px}.package-actions .primary,.package-actions .secondary{min-height:34px;padding:5px;font-size:12px}main[data-step="2"] .sweet-name{font-size:clamp(18px,5vw,23px)}}
+@media(max-height:420px){.package-actions .primary,.package-actions .secondary{min-height:30px;font-size:11px}main[data-step="2"] .sweet-name{font-size:17px}}
+</style></head><body><div class="app"><div class="steps" id="steps" aria-label="تقدم الطلب"></div><button class="round floating-back" id="back" aria-label="رجوع">→</button><main id="main"></main><footer class="footer" id="footer"></footer><dialog id="receipt-dialog" aria-label="تفاصيل الطلب"></dialog></div>
 <script>
 const fallback={branches:[{name:"فرع التشريعي",note:"متاح للطلب",open:true},{name:"فرع النصر - بهلول",note:"يفتح صباحاً",open:false},{name:"فرع تجريبي",note:"متاح للطلب",open:true}],boxes:[{name:"بوكس ضيافة",capacity:5,kind:"box"},{name:"بوكس صغير",capacity:1,kind:"small"},{name:"صحن حلويات",capacity:2,kind:"plate"}],sweets:[{name:"لمسة ذهب",desc:"كنافة ذهبية بالجبنة والفستق",price:100,kind:"kunafa"},{name:"غيمة عسل",desc:"سميد محمّص بلمسة قطر",price:70,kind:"basbousa"},{name:"ليالي العنبر",desc:"كنافة عربية بالجوز والقرفة",price:90,kind:"arabic"},{name:"تاج الفستق",desc:"رقائق مقرمشة وحشوة فستق",price:120,kind:"baklava"}]};
 const packageExtras=[
@@ -409,7 +418,7 @@ if(step===9){
  main.innerHTML='<div class="center"><div class="eyebrow">ضيافة على قد المناسبة</div><h1>هيك بتكفي كل ضيوفك</h1><p class="hint">'+esc(eventLabel())+'</p></div><div class="event-hero">'+boxArt("box")+'</div><div class="summary"><div class="summaryrow"><span>عدد الضيوف</span><b>'+guests+'</b></div><div class="summaryrow"><span>الكمية المقترحة</span><b>'+fmt(estimate)+' كيلو</b></div><div class="summaryrow"><span>سعر تقريبي</span><b>حوالي '+money(Math.round(estimate*avg))+'</b></div></div><div class="notice">اقتراح تجريبي على أساس 150 غرام لكل ضيف، قابل للتعديل حسب ذوقك. السعر النهائي حسب الأصناف المختارة.</div>';
  footer.innerHTML=primary("اعتمد التشكيلة المقترحة","event-preset")+'<button class="secondary checkout-secondary" data-act="event-custom">بدي أشكّل الضيافة بنفسي</button>';
 }
-if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار لتشوف باقي التشكيلات</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div></div></div>'+nav(box,data.boxes.length);footer.innerHTML='<div class="buttonrow">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div>'}
+if(step===1){main.innerHTML='<div class="center package-heading"><div class="eyebrow">اختيار البوكس</div><h1>اختار البوكس اللي بناسبك</h1><p class="hint">اسحب يمين أو يسار لتشوف باقي التشكيلات</p></div><div class="stage package-wheel" data-swipe="horizontal"><div class="carousel"></div><div class="package-info center"><h2 id="package-name">'+esc(bx.name)+'</h2><p class="hint" id="package-desc">'+esc(bx.desc)+'</p><div class="package-capacity" id="package-capacity">'+fmt(bx.capacity)+' كيلو</div><div class="buttonrow package-actions">'+primary("اختر تشكيلة جاهزة","preset")+'<button class="secondary" data-act="custom">خصص المحتويات</button></div></div></div>'+nav(box,data.boxes.length);footer.innerHTML=''}
 if(step===2){
  let q=amounts[sweet]||0;
  let pieces=Object.entries(amounts).filter(([i,v])=>v>0).map(([i,v])=>'<button type="button" class="piece '+(Number(i)===sweet?'active-piece':'')+'" data-index="'+i+'" data-act="jump-sweet:'+i+'" aria-label="عرض '+esc(data.sweets[i].name)+'" aria-pressed="'+(Number(i)===sweet)+'">'+pieceArt(data.sweets[i].kind)+'<b>'+esc(data.sweets[i].name)+'</b><span>'+fmt(v)+' كغ</span></button>').join("");
@@ -565,9 +574,11 @@ function paintSpring(){
  const s=scene;if(!s)return;
  const w=s.stage.clientWidth,h=s.stage.clientHeight,side=clamp(w*.46,82,255);
  if(!w||!h)return;
- const artWidth=Math.max(64,s.wheel?Math.min(w*.52,h*.70,230):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
+ const packageInfo=s.wheel?s.stage.querySelector(".package-info"):null;
+ const infoHeight=packageInfo?.offsetHeight||130;
+ const artWidth=Math.max(52,s.wheel?Math.min(w*.52,h*.70,230,Math.max(52,(h*.73-infoHeight-12)*2*320/220)):Math.min(w*(s.circular?.77:.86),h*1.45,s.step===2?330:365));
  s.stage.style.setProperty("--art-width",artWidth+"px");
- if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.min(Math.max(0,h-108),Math.max(h*.64,h*.27+artWidth*220/320/2+24)))+"px");
+ if(s.wheel)s.stage.style.setProperty("--package-info-top",Math.round(Math.max(0,Math.min(h-infoHeight-5,h*.27+artWidth*220/320/2+5)))+"px");
  if(s.wheel){const index=wrap(Math.round(s.k)%s.items.length,s.items.length);if(index!==s.shown){s.shown=index;const x=s.items[index];document.getElementById("package-name").textContent=x.name;document.getElementById("package-desc").textContent=x.desc;document.getElementById("package-capacity").textContent=fmt(x.capacity)+" كيلو";main.querySelectorAll(".dots span").forEach((dot,i)=>dot.classList.toggle("on",i===index))}}
  let cameraX=0,cameraY=0;
  if(s.vertical&&s.path){

@@ -1146,7 +1146,12 @@ function refreshSweetQuantity(){
 function expandSweetWheel(s){
  if(!s||reduceMotion.matches||!Element.prototype.animate)return;
  s.expandAnimation?.cancel();
- s.expandAnimation=s.layer.animate([{transform:"scale(1)"},{transform:"scale(1.10)",offset:.38},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.2,.72,.25,1)"});
+ s.expandAnimation=s.layer.animate([
+ {transform:"perspective(850px) rotateX(0deg) scale(1)",offset:0},
+ {transform:"perspective(850px) rotateX(-24deg) scale(1.04)",offset:.18},
+ {transform:"perspective(850px) rotateX(18deg) scale(1.08)",offset:.58},
+ {transform:"perspective(850px) rotateX(0deg) scale(1)",offset:1}
+ ],{duration:780,easing:"cubic-bezier(.22,.72,.25,1)"});
 }
 function action(a){
  if(a==="prev"||a==="next"){navigate(a==="next"?1:-1);return}
